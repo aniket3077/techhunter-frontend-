@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from 'react';
+import { APIProvider, Map as GoogleMap, Marker, DirectionsRenderer } from '@vis.gl/react-google-maps';
 import { CheckCircle2, MapPinned, Navigation, Phone } from 'lucide-react';
 import { AMBULANCES_ENDPOINT, CASES_ENDPOINT } from '@/lib/api';
+
+const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
 
 type EmergencyCase = {
   id: string;
@@ -178,43 +181,70 @@ export default function DriverPanel() {
             </div>
           </div>
           
-          <div className="flex flex-1 items-center justify-center bg-slate-100/50 p-6">
-            <div className="text-center">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-cyan-100 text-cyan-600">
-                <MapPinned size={32} />
+          {activeCase ? (
+            <div className="flex-1 bg-slate-100/50">
+              <APIProvider apiKey={GOOGLE_MAPS_API_KEY}>
+                <GoogleMap
+                  defaultCenter={{ lat: activeCase.locationLat, lng: activeCase.locationLng }}
+                  defaultZoom={14}
+                  mapId="driver-route-map"
+                  gestureHandling="greedy"
+                  disableDefaultUI={false}
+                  style={{ width: '100%', height: '100%' }}
+                >
+                  {/* Emergency Location Marker */}
+                  <Marker
+                    position={{ lat: activeCase.locationLat, lng: activeCase.locationLng }}
+                    title={`Emergency: ${activeCase.user?.name || 'Unknown'}`}
+                  />
+                  
+                  {/* Ambulance Current Position (simulated) */}
+                  <Marker
+                    position={{ 
+                      lat: activeCase.locationLat - 0.01, 
+                      lng: activeCase.locationLng - 0.01 
+                    }}
+                    title="Your Location"
+                  />
+                </GoogleMap>
+              </APIProvider>
+              
+              {/* Quick Action Buttons Overlay */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+                <a
+                  href={`https://www.google.com/maps?q=${activeCase.locationLat},${activeCase.locationLng}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rounded-full border border-cyan-200 bg-white px-4 py-2 text-sm font-medium text-cyan-700 shadow-lg hover:bg-cyan-50"
+                >
+                  Open in Google Maps
+                </a>
+                <a
+                  href={`https://www.google.com/maps/dir/?api=1&destination=${activeCase.locationLat},${activeCase.locationLng}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-lg hover:bg-slate-50"
+                >
+                  Start Navigation
+                </a>
               </div>
-              <p className="mt-4 text-slate-500">
-                {loading
-                  ? 'Loading route coordinates...'
-                  : activeCase
-                    ? `Route to ${activeCase.locationLat.toFixed(4)}, ${activeCase.locationLng.toFixed(4)}`
-                    : 'No active dispatch route yet. Waiting for assignment.'}
-                <br />
-                {activeCase ? '(Live mission route is active)' : '(Driver panel will update automatically)'}
-              </p>
-
-              {activeCase ? (
-                <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-                  <a
-                    href={`https://www.google.com/maps?q=${activeCase.locationLat},${activeCase.locationLng}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="rounded-full border border-cyan-200 bg-white px-4 py-2 text-sm font-medium text-cyan-700 hover:bg-cyan-50"
-                  >
-                    Open in Google Maps
-                  </a>
-                  <a
-                    href={`https://www.google.com/maps/dir/?api=1&destination=${activeCase.locationLat},${activeCase.locationLng}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-                  >
-                    Start Navigation
-                  </a>
-                </div>
-              ) : null}
             </div>
-          </div>
+          ) : (
+            <div className="flex flex-1 items-center justify-center bg-slate-100/50 p-6">
+              <div className="text-center">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-cyan-100 text-cyan-600">
+                  <MapPinned size={32} />
+                </div>
+                <p className="mt-4 text-slate-500">
+                  {loading
+                    ? 'Loading route coordinates...'
+                    : 'No active dispatch route yet. Waiting for assignment.'}
+                  <br />
+                  (Driver panel will update automatically)
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Sidebar / Actions */}
