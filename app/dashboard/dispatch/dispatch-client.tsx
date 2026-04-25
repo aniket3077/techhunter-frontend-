@@ -658,21 +658,6 @@ export default function DispatchClient() {
                     key={emergency.id}
                     position={emergency.coordinates}
                     title={`${emergency.patientName} - ${emergency.severity.toUpperCase()}`}
-                    icon={{
-                      path: google.maps.SymbolPath.CIRCLE,
-                      scale: 12,
-                      fillColor:
-                        emergency.severity === 'critical'
-                          ? '#ef4444'
-                          : emergency.severity === 'high'
-                          ? '#f97316'
-                          : emergency.severity === 'medium'
-                          ? '#eab308'
-                          : '#22c55e',
-                      fillOpacity: 0.9,
-                      strokeColor: '#ffffff',
-                      strokeWeight: 2,
-                    }}
                     onClick={() => setSelectedEmergency(emergency)}
                   />
                 ))}
@@ -683,15 +668,6 @@ export default function DispatchClient() {
                     key={ambulance.id}
                     position={ambulance.coordinates}
                     title={`${ambulance.vehicleNumber} - ${ambulance.status.toUpperCase()}`}
-                    icon={{
-                      path: 'M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3z',
-                      scale: 1.5,
-                      fillColor: ambulance.status === 'available' ? '#3b82f6' : '#94a3b8',
-                      fillOpacity: 1,
-                      strokeColor: '#ffffff',
-                      strokeWeight: 2,
-                      anchor: new google.maps.Point(12, 12),
-                    }}
                   />
                 ))}
 

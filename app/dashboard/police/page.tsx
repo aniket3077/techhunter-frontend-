@@ -321,14 +321,6 @@ export default function PolicePanel() {
                       key={currentCase.id}
                       position={{ lat: currentCase.locationLat, lng: currentCase.locationLng }}
                       title={`Emergency: ${currentCase.aiSeverity}`}
-                      icon={{
-                        path: google.maps.SymbolPath.CIRCLE,
-                        scale: 14,
-                        fillColor: currentCase.aiSeverity === 'CRITICAL' ? '#dc2626' : '#f97316',
-                        fillOpacity: 1,
-                        strokeColor: '#ffffff',
-                        strokeWeight: 3,
-                      }}
                     />
                   ) : null
                 )}
@@ -339,15 +331,6 @@ export default function PolicePanel() {
                     key={unit.id}
                     position={{ lat: 40.7128 + Math.random() * 0.05, lng: -74.006 + Math.random() * 0.05 }}
                     title={`Ambulance: ${unit.driverName}`}
-                    icon={{
-                      path: 'M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3z',
-                      scale: 1.5,
-                      fillColor: '#3b82f6',
-                      fillOpacity: 1,
-                      strokeColor: '#ffffff',
-                      strokeWeight: 2,
-                      anchor: new google.maps.Point(12, 12),
-                    }}
                   />
                 ))}
 
@@ -359,15 +342,6 @@ export default function PolicePanel() {
                       key={landmark.id}
                       position={landmark.coordinates}
                       title={landmark.name}
-                      icon={{
-                        path: 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z',
-                        scale: 1.2,
-                        fillColor: '#10b981',
-                        fillOpacity: 0.9,
-                        strokeColor: '#ffffff',
-                        strokeWeight: 2,
-                        anchor: new google.maps.Point(12, 22),
-                      }}
                     />
                   ))}
 
@@ -379,15 +353,6 @@ export default function PolicePanel() {
                       key={landmark.id}
                       position={landmark.coordinates}
                       title={landmark.name}
-                      icon={{
-                        path: 'M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3z',
-                        scale: 1.3,
-                        fillColor: '#3b82f6',
-                        fillOpacity: 0.9,
-                        strokeColor: '#ffffff',
-                        strokeWeight: 2,
-                        anchor: new google.maps.Point(12, 12),
-                      }}
                     />
                   ))}
 
@@ -399,15 +364,6 @@ export default function PolicePanel() {
                       key={landmark.id}
                       position={landmark.coordinates}
                       title={landmark.name}
-                      icon={{
-                        path: 'M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3z',
-                        scale: 1.3,
-                        fillColor: '#ef4444',
-                        fillOpacity: 0.9,
-                        strokeColor: '#ffffff',
-                        strokeWeight: 2,
-                        anchor: new google.maps.Point(12, 12),
-                      }}
                     />
                   ))}
               </GoogleMap>
