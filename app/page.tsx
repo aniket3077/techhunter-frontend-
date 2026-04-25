@@ -67,19 +67,19 @@ const productLanes = [
   {
     title: 'User App',
     icon: PhoneCall,
-    accent: 'border-rose-400/25 bg-rose-400/10 text-rose-100',
+    accent: 'border-rose-200 bg-rose-50 text-rose-600',
     items: ['SOS button', 'Voice command trigger', 'Live tracking', 'Emergency history'],
   },
   {
     title: 'Web Dashboard',
     icon: Building2,
-    accent: 'border-cyan-400/25 bg-cyan-400/10 text-cyan-100',
+    accent: 'border-cyan-200 bg-cyan-50 text-cyan-700',
     items: ['Hospital login', 'Case monitoring', 'AI severity display', 'Resource allocation'],
   },
   {
     title: 'Ambulance Interface',
     icon: Ambulance,
-    accent: 'border-emerald-400/25 bg-emerald-400/10 text-emerald-100',
+    accent: 'border-emerald-200 bg-emerald-50 text-emerald-700',
     items: ['Request notification', 'Accept or reject workflow', 'Navigation cues', 'Unit status updates'],
   },
 ] as const;
@@ -137,21 +137,21 @@ export default async function Home() {
   return (
     <div className="px-4 py-4 sm:px-6 lg:px-8">
       <main className="mx-auto flex max-w-7xl flex-col gap-6">
-        <section className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(248,113,113,0.28),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(34,211,238,0.2),_transparent_24%),linear-gradient(135deg,#08111f_0%,#121d34_45%,#15243b_100%)] px-6 py-10 shadow-2xl shadow-slate-950/30 sm:px-10 lg:px-12 lg:py-14">
-          <div className="absolute inset-y-0 right-0 hidden w-1/2 bg-[radial-gradient(circle,_rgba(34,211,238,0.12),_transparent_58%)] lg:block" />
+        <section className="relative overflow-hidden rounded-[2rem] border border-slate-200/60 bg-[radial-gradient(circle_at_top_left,_rgba(244,63,94,0.08),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(14,165,233,0.06),_transparent_24%),linear-gradient(135deg,#ffffff_0%,#f1f5f9_45%,#e2e8f0_100%)] px-6 py-10 shadow-xl shadow-slate-200/50 sm:px-10 lg:px-12 lg:py-14">
+          <div className="absolute inset-y-0 right-0 hidden w-1/2 bg-[radial-gradient(circle,_rgba(14,165,233,0.08),_transparent_58%)] lg:block" />
 
           <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1.3fr)_360px] lg:items-end">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/8 px-4 py-2 text-sm text-cyan-100">
+              <div className="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 text-sm font-medium text-cyan-700">
                 <Stethoscope size={16} />
                 AI emergency response platform
               </div>
 
-              <h1 className="mt-6 max-w-3xl text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+              <h1 className="mt-6 max-w-3xl text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl">
                 Faster emergency decisions with real-time triage, dispatch, and cloud-backed coordination.
               </h1>
 
-              <p className="mt-5 max-w-2xl text-base leading-8 text-slate-200 sm:text-lg">
+              <p className="mt-5 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg">
                 PulseRescue AI brings together citizens, hospitals, and ambulance fleets so SOS intake,
                 severity classification, live tracking, and ambulance selection happen in one operating system.
               </p>
@@ -166,7 +166,7 @@ export default async function Home() {
                 </Link>
                 <Link
                   href="/dashboard/units"
-                  className="inline-flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/8 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/12"
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-slate-900"
                 >
                   View ambulance fleet
                   <Ambulance size={16} />
@@ -174,41 +174,41 @@ export default async function Home() {
               </div>
             </div>
 
-            <div className="relative rounded-[1.75rem] border border-white/10 bg-slate-950/50 p-6 backdrop-blur">
+            <div className="relative rounded-[1.75rem] border border-slate-200/60 bg-white/70 p-6 shadow-sm backdrop-blur">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm uppercase tracking-[0.3em] text-cyan-200">System Pulse</p>
-                  <h2 className="mt-2 text-xl font-semibold text-white">Live platform state</h2>
+                  <p className="text-sm font-medium uppercase tracking-[0.3em] text-cyan-600">System Pulse</p>
+                  <h2 className="mt-2 text-xl font-semibold text-slate-900">Live platform state</h2>
                 </div>
-                <span className="rounded-full border border-white/10 bg-white/8 px-3 py-1 text-xs uppercase tracking-[0.2em] text-slate-300">
+                <span className="rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-xs font-medium uppercase tracking-[0.2em] text-slate-500">
                   {apiHealthy ? 'Connected' : 'Waiting'}
                 </span>
               </div>
 
               <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
-                <div className="rounded-2xl border border-white/10 bg-white/6 p-4">
-                  <p className="text-sm text-slate-300">Active emergencies</p>
-                  <p className="mt-3 text-3xl font-semibold text-white">{overview?.activeEmergencies ?? 0}</p>
+                <div className="rounded-2xl border border-slate-200/60 bg-white/60 p-4 shadow-sm">
+                  <p className="text-sm text-slate-500">Active emergencies</p>
+                  <p className="mt-3 text-3xl font-semibold text-slate-900">{overview?.activeEmergencies ?? 0}</p>
                 </div>
-                <div className="rounded-2xl border border-white/10 bg-white/6 p-4">
-                  <p className="text-sm text-slate-300">Available ambulances</p>
-                  <p className="mt-3 text-3xl font-semibold text-white">{overview?.availableAmbulances ?? 0}</p>
+                <div className="rounded-2xl border border-slate-200/60 bg-white/60 p-4 shadow-sm">
+                  <p className="text-sm text-slate-500">Available ambulances</p>
+                  <p className="mt-3 text-3xl font-semibold text-slate-900">{overview?.availableAmbulances ?? 0}</p>
                 </div>
-                <div className="rounded-2xl border border-white/10 bg-white/6 p-4">
-                  <p className="text-sm text-slate-300">Average response loop</p>
-                  <p className="mt-3 text-3xl font-semibold text-white">
+                <div className="rounded-2xl border border-slate-200/60 bg-white/60 p-4 shadow-sm">
+                  <p className="text-sm text-slate-500">Average response loop</p>
+                  <p className="mt-3 text-3xl font-semibold text-slate-900">
                     {formatMinutes(overview?.averageResolutionMinutes)}
                   </p>
                 </div>
-                <div className="rounded-2xl border border-white/10 bg-white/6 p-4">
-                  <p className="text-sm text-slate-300">Fleet readiness</p>
-                  <p className="mt-3 text-3xl font-semibold text-white">
+                <div className="rounded-2xl border border-slate-200/60 bg-white/60 p-4 shadow-sm">
+                  <p className="text-sm text-slate-500">Fleet readiness</p>
+                  <p className="mt-3 text-3xl font-semibold text-slate-900">
                     {overview?.fleetReadiness ?? 0}%
                   </p>
                 </div>
               </div>
 
-              <p className="mt-5 text-sm leading-6 text-slate-300">
+              <p className="mt-5 text-sm leading-6 text-slate-600">
                 Backend status: {apiHealthy ? 'healthy' : 'not reachable'}.
                 {' '}
                 {health?.data
@@ -226,15 +226,15 @@ export default async function Home() {
             return (
               <article
                 key={lane.title}
-                className="rounded-[1.75rem] border border-white/10 bg-white/6 p-6 backdrop-blur"
+                className="rounded-[1.75rem] border border-slate-200/60 bg-white/60 p-6 shadow-sm backdrop-blur"
               >
                 <div className={`inline-flex rounded-2xl border p-3 ${lane.accent}`}>
                   <Icon size={20} />
                 </div>
-                <h3 className="mt-5 text-2xl font-semibold text-white">{lane.title}</h3>
-                <div className="mt-5 grid gap-2 text-sm text-slate-300">
+                <h3 className="mt-5 text-2xl font-semibold text-slate-900">{lane.title}</h3>
+                <div className="mt-5 grid gap-2 text-sm text-slate-600">
                   {lane.items.map((item) => (
-                    <p key={item} className="rounded-2xl border border-white/8 bg-slate-950/40 px-4 py-3">
+                    <p key={item} className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
                       {item}
                     </p>
                   ))}
@@ -245,10 +245,10 @@ export default async function Home() {
         </section>
 
         <section className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,1fr)]">
-          <div className="rounded-[2rem] border border-white/10 bg-white/6 p-6 backdrop-blur sm:p-8">
-            <div className="flex items-center gap-3 text-cyan-200">
+          <div className="rounded-[2rem] border border-slate-200/60 bg-white/60 p-6 shadow-sm backdrop-blur sm:p-8">
+            <div className="flex items-center gap-3 text-cyan-600">
               <BrainCircuit size={20} />
-              <p className="text-sm uppercase tracking-[0.3em]">AI Capabilities</p>
+              <p className="text-sm font-medium uppercase tracking-[0.3em]">AI Capabilities</p>
             </div>
 
             <div className="mt-6 grid gap-4 md:grid-cols-2">
@@ -258,41 +258,41 @@ export default async function Home() {
                 return (
                   <article
                     key={module.title}
-                    className="rounded-3xl border border-white/10 bg-slate-950/45 p-5"
+                    className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"
                   >
-                    <div className="inline-flex rounded-2xl border border-cyan-400/20 bg-cyan-400/10 p-3 text-cyan-100">
+                    <div className="inline-flex rounded-2xl border border-cyan-200 bg-cyan-50 p-3 text-cyan-700">
                       <Icon size={18} />
                     </div>
-                    <h3 className="mt-4 text-lg font-semibold text-white">{module.title}</h3>
-                    <p className="mt-3 text-sm leading-6 text-slate-300">{module.description}</p>
+                    <h3 className="mt-4 text-lg font-semibold text-slate-900">{module.title}</h3>
+                    <p className="mt-3 text-sm leading-6 text-slate-600">{module.description}</p>
                   </article>
                 );
               })}
             </div>
           </div>
 
-          <div className="rounded-[2rem] border border-white/10 bg-white/6 p-6 backdrop-blur sm:p-8">
-            <div className="flex items-center gap-3 text-cyan-200">
+          <div className="rounded-[2rem] border border-slate-200/60 bg-white/60 p-6 shadow-sm backdrop-blur sm:p-8">
+            <div className="flex items-center gap-3 text-cyan-600">
               <TimerReset size={20} />
-              <p className="text-sm uppercase tracking-[0.3em]">Success Metrics</p>
+              <p className="text-sm font-medium uppercase tracking-[0.3em]">Success Metrics</p>
             </div>
 
             <div className="mt-6 space-y-4">
-              <div className="rounded-3xl border border-white/10 bg-slate-950/45 p-5">
-                <p className="text-sm text-slate-300">Response time reduction</p>
-                <p className="mt-3 text-2xl font-semibold text-white">
+              <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+                <p className="text-sm text-slate-500">Response time reduction</p>
+                <p className="mt-3 text-2xl font-semibold text-slate-900">
                   {formatMinutes(overview?.averageResolutionMinutes)}
                 </p>
               </div>
-              <div className="rounded-3xl border border-white/10 bg-slate-950/45 p-5">
-                <p className="text-sm text-slate-300">System reliability</p>
-                <p className="mt-3 text-2xl font-semibold text-white">
+              <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+                <p className="text-sm text-slate-500">System reliability</p>
+                <p className="mt-3 text-2xl font-semibold text-slate-900">
                   {apiHealthy ? 'Operational' : 'Needs backend'}
                 </p>
               </div>
-              <div className="rounded-3xl border border-white/10 bg-slate-950/45 p-5">
-                <p className="text-sm text-slate-300">AI accuracy focus</p>
-                <p className="mt-3 text-2xl font-semibold text-white">
+              <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+                <p className="text-sm text-slate-500">AI accuracy focus</p>
+                <p className="mt-3 text-2xl font-semibold text-slate-900">
                   {overview?.criticalAlerts ?? 0} high-priority cases under watch
                 </p>
               </div>
@@ -307,47 +307,47 @@ export default async function Home() {
             return (
               <article
                 key={item.title}
-                className="rounded-[1.75rem] border border-white/10 bg-white/6 p-6 backdrop-blur"
+                className="rounded-[1.75rem] border border-slate-200/60 bg-white/60 p-6 shadow-sm backdrop-blur"
               >
-                <div className="inline-flex rounded-2xl border border-white/10 bg-slate-950/40 p-3 text-cyan-100">
+                <div className="inline-flex rounded-2xl border border-cyan-200 bg-cyan-50 p-3 text-cyan-700">
                   <Icon size={20} />
                 </div>
-                <h3 className="mt-5 text-xl font-semibold text-white">{item.title}</h3>
-                <p className="mt-3 text-sm leading-6 text-slate-300">{item.description}</p>
+                <h3 className="mt-5 text-xl font-semibold text-slate-900">{item.title}</h3>
+                <p className="mt-3 text-sm leading-6 text-slate-600">{item.description}</p>
               </article>
             );
           })}
         </section>
 
         <section className="grid gap-4 md:grid-cols-3">
-          <article className="rounded-[1.75rem] border border-white/10 bg-white/6 p-6 backdrop-blur">
-            <div className="flex items-center gap-3 text-cyan-200">
+          <article className="rounded-[1.75rem] border border-slate-200/60 bg-white/60 p-6 shadow-sm backdrop-blur">
+            <div className="flex items-center gap-3 text-cyan-600">
               <Mic size={18} />
-              <p className="text-sm font-semibold">Voice-trigger ready</p>
+              <p className="text-sm font-semibold text-slate-900">Voice-trigger ready</p>
             </div>
-            <p className="mt-4 text-sm leading-6 text-slate-300">
+            <p className="mt-4 text-sm leading-6 text-slate-600">
               The citizen workflow is structured for a voice activation layer, so hands-free SOS can feed
               the same backend pipeline as a manual emergency alert.
             </p>
           </article>
 
-          <article className="rounded-[1.75rem] border border-white/10 bg-white/6 p-6 backdrop-blur">
-            <div className="flex items-center gap-3 text-cyan-200">
+          <article className="rounded-[1.75rem] border border-slate-200/60 bg-white/60 p-6 shadow-sm backdrop-blur">
+            <div className="flex items-center gap-3 text-cyan-600">
               <MapPinned size={18} />
-              <p className="text-sm font-semibold">Real-time tracking</p>
+              <p className="text-sm font-semibold text-slate-900">Real-time tracking</p>
             </div>
-            <p className="mt-4 text-sm leading-6 text-slate-300">
+            <p className="mt-4 text-sm leading-6 text-slate-600">
               Every emergency case stores live coordinates, making it easy to stream tracking updates and
               route ambulance crews without redesigning the data model.
             </p>
           </article>
 
-          <article className="rounded-[1.75rem] border border-white/10 bg-white/6 p-6 backdrop-blur">
-            <div className="flex items-center gap-3 text-cyan-200">
+          <article className="rounded-[1.75rem] border border-slate-200/60 bg-white/60 p-6 shadow-sm backdrop-blur">
+            <div className="flex items-center gap-3 text-cyan-600">
               <Database size={18} />
-              <p className="text-sm font-semibold">Centralized cloud data</p>
+              <p className="text-sm font-semibold text-slate-900">Centralized cloud data</p>
             </div>
-            <p className="mt-4 text-sm leading-6 text-slate-300">
+            <p className="mt-4 text-sm leading-6 text-slate-600">
               Emergency records, dispatch summaries, and fleet state live in one operational database so
               hospital teams and ambulance crews stay aligned.
             </p>

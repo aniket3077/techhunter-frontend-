@@ -78,27 +78,27 @@ type ApiResponse<T> = {
 function severityTone(severity: string | null) {
   switch (severity?.toUpperCase()) {
     case 'CRITICAL':
-      return 'border-rose-400/40 bg-rose-400/15 text-rose-100';
+      return 'border-rose-200 bg-rose-50 text-rose-700';
     case 'HIGH':
-      return 'border-orange-400/40 bg-orange-400/15 text-orange-100';
+      return 'border-orange-200 bg-orange-50 text-orange-700';
     case 'MEDIUM':
-      return 'border-amber-400/40 bg-amber-400/15 text-amber-100';
+      return 'border-amber-200 bg-amber-50 text-amber-700';
     default:
-      return 'border-slate-300/20 bg-slate-300/10 text-slate-100';
+      return 'border-slate-200 bg-slate-50 text-slate-600';
   }
 }
 
 function statusTone(status: EmergencyCase['status'] | AmbulanceUnit['status']) {
   switch (status) {
     case 'PENDING':
-      return 'border-rose-400/35 bg-rose-400/15 text-rose-100';
+      return 'border-rose-200 bg-rose-50 text-rose-700';
     case 'DISPATCHED':
-      return 'border-sky-400/35 bg-sky-400/15 text-sky-100';
+      return 'border-sky-200 bg-sky-50 text-sky-700';
     case 'RESOLVED':
     case 'AVAILABLE':
-      return 'border-emerald-400/35 bg-emerald-400/15 text-emerald-100';
+      return 'border-emerald-200 bg-emerald-50 text-emerald-700';
     default:
-      return 'border-amber-400/35 bg-amber-400/15 text-amber-100';
+      return 'border-amber-200 bg-amber-50 text-amber-700';
   }
 }
 
@@ -180,12 +180,12 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-3xl border border-white/10 bg-white/6 p-5">
+        <div className="rounded-3xl border border-slate-200/60 bg-white/60 p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <p className="text-sm text-slate-300">Active emergencies</p>
-            <TriangleAlert className="text-rose-300" size={18} />
+            <p className="text-sm text-slate-500">Active emergencies</p>
+            <TriangleAlert className="text-rose-500" size={18} />
           </div>
-          <p className="mt-4 text-3xl font-semibold text-white">
+          <p className="mt-4 text-3xl font-semibold text-slate-900">
             {summary?.activeEmergencies ?? activeCases.length}
           </p>
           <p className="mt-2 text-sm text-slate-400">
@@ -193,12 +193,12 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        <div className="rounded-3xl border border-white/10 bg-white/6 p-5">
+        <div className="rounded-3xl border border-slate-200/60 bg-white/60 p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <p className="text-sm text-slate-300">Pending dispatch</p>
-            <Radio className="text-amber-300" size={18} />
+            <p className="text-sm text-slate-500">Pending dispatch</p>
+            <Radio className="text-amber-500" size={18} />
           </div>
-          <p className="mt-4 text-3xl font-semibold text-white">
+          <p className="mt-4 text-3xl font-semibold text-slate-900">
             {summary?.pendingDispatch ?? 0}
           </p>
           <p className="mt-2 text-sm text-slate-400">
@@ -206,12 +206,12 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        <div className="rounded-3xl border border-white/10 bg-white/6 p-5">
+        <div className="rounded-3xl border border-slate-200/60 bg-white/60 p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <p className="text-sm text-slate-300">Available ambulances</p>
-            <Ambulance className="text-emerald-300" size={18} />
+            <p className="text-sm text-slate-500">Available ambulances</p>
+            <Ambulance className="text-emerald-500" size={18} />
           </div>
-          <p className="mt-4 text-3xl font-semibold text-white">
+          <p className="mt-4 text-3xl font-semibold text-slate-900">
             {summary?.availableAmbulances ?? 0}
           </p>
           <p className="mt-2 text-sm text-slate-400">
@@ -219,12 +219,12 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        <div className="rounded-3xl border border-white/10 bg-white/6 p-5">
+        <div className="rounded-3xl border border-slate-200/60 bg-white/60 p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <p className="text-sm text-slate-300">Average response loop</p>
-            <TimerReset className="text-sky-300" size={18} />
+            <p className="text-sm text-slate-500">Average response loop</p>
+            <TimerReset className="text-sky-500" size={18} />
           </div>
-          <p className="mt-4 text-3xl font-semibold text-white">
+          <p className="mt-4 text-3xl font-semibold text-slate-900">
             {formatMinutes(summary?.averageResolutionMinutes ?? null)}
           </p>
           <p className="mt-2 text-sm text-slate-400">
@@ -234,37 +234,37 @@ export default function DashboardPage() {
       </section>
 
       {error ? (
-        <div className="rounded-3xl border border-rose-400/30 bg-rose-400/10 px-5 py-4 text-sm text-rose-100">
+        <div className="rounded-3xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
           {error}
         </div>
       ) : null}
 
       <section className="grid gap-6 xl:grid-cols-[minmax(0,1.7fr)_minmax(340px,1fr)]">
-        <div className="rounded-3xl border border-white/10 bg-white/6 p-5">
+        <div className="rounded-3xl border border-slate-200/60 bg-white/60 p-5 shadow-sm">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm uppercase tracking-[0.25em] text-cyan-200">Case Monitoring</p>
-              <h3 className="mt-2 text-xl font-semibold text-white">Live incident feed</h3>
+              <p className="text-sm font-medium uppercase tracking-[0.25em] text-cyan-600">Case Monitoring</p>
+              <h3 className="mt-2 text-xl font-semibold text-slate-900">Live incident feed</h3>
             </div>
-            <span className="rounded-full border border-white/10 bg-white/8 px-3 py-1 text-xs uppercase tracking-[0.2em] text-slate-300">
+            <span className="rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-xs font-medium uppercase tracking-[0.2em] text-slate-500">
               {loading ? 'Syncing' : `${activeCases.length} live`}
             </span>
           </div>
 
           <div className="mt-5 space-y-4">
             {loading && cases.length === 0 ? (
-              <div className="rounded-3xl border border-dashed border-white/10 bg-slate-950/40 px-5 py-10 text-center text-slate-400">
+              <div className="rounded-3xl border border-dashed border-slate-200 bg-slate-50/70 px-5 py-10 text-center text-slate-500">
                 Loading emergency cases...
               </div>
             ) : activeCases.length === 0 ? (
-              <div className="rounded-3xl border border-dashed border-white/10 bg-slate-950/40 px-5 py-10 text-center text-slate-400">
+              <div className="rounded-3xl border border-dashed border-slate-200 bg-slate-50/70 px-5 py-10 text-center text-slate-500">
                 No active emergency cases yet. New SOS requests will appear here.
               </div>
             ) : (
               activeCases.map((emergencyCase) => (
                 <article
                   key={emergencyCase.id}
-                  className="rounded-3xl border border-white/10 bg-slate-950/45 p-5"
+                  className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"
                 >
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <div className="space-y-3">
@@ -286,17 +286,17 @@ export default function DashboardPage() {
                       </div>
 
                       <div>
-                        <h4 className="text-lg font-semibold text-white">
+                        <h4 className="text-lg font-semibold text-slate-900">
                           {emergencyCase.user?.name ?? 'Unknown caller'}
                         </h4>
-                        <p className="mt-1 text-sm text-slate-300">
+                        <p className="mt-1 text-sm text-slate-500">
                           {emergencyCase.user?.phone ?? 'No contact number captured'}
                         </p>
                       </div>
 
-                      <div className="grid gap-3 text-sm text-slate-300 sm:grid-cols-2">
+                      <div className="grid gap-3 text-sm text-slate-500 sm:grid-cols-2">
                         <p className="flex items-center gap-2">
-                          <Clock3 size={16} className="text-cyan-300" />
+                          <Clock3 size={16} className="text-cyan-600" />
                           {new Date(emergencyCase.createdAt).toLocaleString([], {
                             hour: '2-digit',
                             minute: '2-digit',
@@ -305,26 +305,26 @@ export default function DashboardPage() {
                           })}
                         </p>
                         <p className="flex items-center gap-2">
-                          <MapPinned size={16} className="text-cyan-300" />
+                          <MapPinned size={16} className="text-cyan-600" />
                           {emergencyCase.locationLat.toFixed(4)}, {emergencyCase.locationLng.toFixed(4)}
                         </p>
                       </div>
                     </div>
 
-                    <div className="min-w-[220px] rounded-2xl border border-cyan-400/20 bg-cyan-400/10 p-4">
-                      <p className="text-xs uppercase tracking-[0.2em] text-cyan-100">
+                    <div className="min-w-[220px] rounded-2xl border border-cyan-200 bg-cyan-50 p-4">
+                      <p className="text-xs font-medium uppercase tracking-[0.2em] text-cyan-700">
                         Assigned response
                       </p>
-                      <p className="mt-2 text-base font-semibold text-white">
+                      <p className="mt-2 text-base font-semibold text-slate-900">
                         {emergencyCase.assignedDriver?.driverName ?? 'Awaiting dispatch'}
                       </p>
-                      <p className="mt-1 text-sm text-slate-300">
+                      <p className="mt-1 text-sm text-cyan-800/80">
                         {emergencyCase.assignedDriver?.hospital?.name ?? 'Smart allocation queue'}
                       </p>
                     </div>
                   </div>
 
-                  <p className="mt-4 text-sm leading-6 text-slate-300">
+                  <p className="mt-4 text-sm leading-6 text-slate-600">
                     {emergencyCase.aiDescription?.trim() ||
                       'AI summary pending. Voice, image, and live tracking signals can enrich this case.'}
                   </p>
@@ -335,17 +335,17 @@ export default function DashboardPage() {
         </div>
 
         <div className="space-y-6">
-          <section className="rounded-3xl border border-white/10 bg-white/6 p-5">
-            <p className="text-sm uppercase tracking-[0.25em] text-cyan-200">AI Dispatch</p>
-            <h3 className="mt-2 text-xl font-semibold text-white">Severity and allocation view</h3>
+          <section className="rounded-3xl border border-slate-200/60 bg-white/60 p-5 shadow-sm">
+            <p className="text-sm font-medium uppercase tracking-[0.25em] text-cyan-600">AI Dispatch</p>
+            <h3 className="mt-2 text-xl font-semibold text-slate-900">Severity and allocation view</h3>
 
             <div className="mt-5 space-y-4">
-              <div className="rounded-2xl border border-white/10 bg-slate-950/45 p-4">
-                <div className="flex items-center gap-2 text-cyan-200">
+              <div className="rounded-2xl border border-slate-200/60 bg-white p-4 shadow-sm">
+                <div className="flex items-center gap-2 text-cyan-600">
                   <BrainCircuit size={18} />
                   <p className="text-sm font-semibold">Current AI recommendation</p>
                 </div>
-                <p className="mt-3 text-sm leading-6 text-slate-300">
+                <p className="mt-3 text-sm leading-6 text-slate-600">
                   {highlightedCase
                     ? `Prioritize ${highlightedCase.user?.name ?? 'the latest caller'} and route the nearest available ambulance before the next polling cycle.`
                     : 'No active cases right now. AI dispatch recommendations will appear when new SOS events arrive.'}
@@ -353,15 +353,15 @@ export default function DashboardPage() {
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
-                <div className="rounded-2xl border border-white/10 bg-slate-950/45 p-4">
-                  <p className="text-sm text-slate-300">Connected hospitals</p>
-                  <p className="mt-3 text-2xl font-semibold text-white">
+                <div className="rounded-2xl border border-slate-200/60 bg-white p-4 shadow-sm">
+                  <p className="text-sm text-slate-500">Connected hospitals</p>
+                  <p className="mt-3 text-2xl font-semibold text-slate-900">
                     {summary?.connectedHospitals ?? 0}
                   </p>
                 </div>
-                <div className="rounded-2xl border border-white/10 bg-slate-950/45 p-4">
-                  <p className="text-sm text-slate-300">Fleet size</p>
-                  <p className="mt-3 text-2xl font-semibold text-white">
+                <div className="rounded-2xl border border-slate-200/60 bg-white p-4 shadow-sm">
+                  <p className="text-sm text-slate-500">Fleet size</p>
+                  <p className="mt-3 text-2xl font-semibold text-slate-900">
                     {summary?.totalAmbulances ?? ambulances.length}
                   </p>
                 </div>
@@ -369,30 +369,30 @@ export default function DashboardPage() {
             </div>
           </section>
 
-          <section className="rounded-3xl border border-white/10 bg-white/6 p-5">
+          <section className="rounded-3xl border border-slate-200/60 bg-white/60 p-5 shadow-sm">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-sm uppercase tracking-[0.25em] text-cyan-200">Resource Allocation</p>
-                <h3 className="mt-2 text-xl font-semibold text-white">Ambulance readiness board</h3>
+                <p className="text-sm font-medium uppercase tracking-[0.25em] text-cyan-600">Resource Allocation</p>
+                <h3 className="mt-2 text-xl font-semibold text-slate-900">Ambulance readiness board</h3>
               </div>
-              <Activity size={18} className="text-emerald-300" />
+              <Activity size={18} className="text-emerald-500" />
             </div>
 
             <div className="mt-5 space-y-3">
               {ambulances.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-white/10 bg-slate-950/40 px-4 py-8 text-center text-sm text-slate-400">
+                <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 px-4 py-8 text-center text-sm text-slate-500">
                   No ambulance units available yet. Add drivers in the backend database to populate this fleet board.
                 </div>
               ) : (
                 ambulances.slice(0, 4).map((ambulance) => (
                   <div
                     key={ambulance.id}
-                    className="rounded-2xl border border-white/10 bg-slate-950/45 p-4"
+                    className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <p className="text-base font-semibold text-white">{ambulance.driverName}</p>
-                        <p className="mt-1 text-sm text-slate-300">
+                        <p className="text-base font-semibold text-slate-900">{ambulance.driverName}</p>
+                        <p className="mt-1 text-sm text-slate-500">
                           {ambulance.hospital?.name ?? 'Unassigned hospital'}
                         </p>
                       </div>
@@ -405,8 +405,8 @@ export default function DashboardPage() {
                       </span>
                     </div>
 
-                    <p className="mt-3 text-sm text-slate-300">{ambulance.recommendedAction}</p>
-                    <p className="mt-2 text-xs uppercase tracking-[0.2em] text-slate-500">
+                    <p className="mt-3 text-sm text-slate-600">{ambulance.recommendedAction}</p>
+                    <p className="mt-2 text-xs font-medium uppercase tracking-[0.2em] text-slate-400">
                       Active assignments: {ambulance.activeAssignmentCount}
                     </p>
                   </div>
@@ -418,34 +418,34 @@ export default function DashboardPage() {
       </section>
 
       <section className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-3xl border border-white/10 bg-white/6 p-5">
-          <div className="flex items-center gap-2 text-cyan-200">
+        <div className="rounded-3xl border border-slate-200/60 bg-white/60 p-5 shadow-sm">
+          <div className="flex items-center gap-2 text-cyan-600">
             <CheckCircle2 size={18} />
             <p className="text-sm font-semibold">Reliability goal</p>
           </div>
-          <p className="mt-3 text-sm leading-6 text-slate-300">
+          <p className="mt-3 text-sm leading-6 text-slate-600">
             Keep operators focused on a single live surface for alerts, ambulance readiness,
             and hospital coordination.
           </p>
         </div>
 
-        <div className="rounded-3xl border border-white/10 bg-white/6 p-5">
-          <div className="flex items-center gap-2 text-cyan-200">
+        <div className="rounded-3xl border border-slate-200/60 bg-white/60 p-5 shadow-sm">
+          <div className="flex items-center gap-2 text-cyan-600">
             <Ambulance size={18} />
             <p className="text-sm font-semibold">Fleet control</p>
           </div>
-          <p className="mt-3 text-sm leading-6 text-slate-300">
+          <p className="mt-3 text-sm leading-6 text-slate-600">
             Ambulance units are exposed through a dedicated endpoint so the fleet view can
             power accept, reject, and availability workflows.
           </p>
         </div>
 
-        <div className="rounded-3xl border border-white/10 bg-white/6 p-5">
-          <div className="flex items-center gap-2 text-cyan-200">
+        <div className="rounded-3xl border border-slate-200/60 bg-white/60 p-5 shadow-sm">
+          <div className="flex items-center gap-2 text-cyan-600">
             <MapPinned size={18} />
             <p className="text-sm font-semibold">Route-ready intake</p>
           </div>
-          <p className="mt-3 text-sm leading-6 text-slate-300">
+          <p className="mt-3 text-sm leading-6 text-slate-600">
             Location coordinates are stored with every SOS event so route optimization can be
             layered in without changing the incident model.
           </p>
