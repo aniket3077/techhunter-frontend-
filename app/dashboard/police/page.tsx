@@ -1,10 +1,58 @@
 "use client";
 
 import { useEffect, useMemo, useState } from 'react';
-import { Siren, Map, ShieldAlert, Check, Radio } from 'lucide-react';
+import { APIProvider, Map as GoogleMap, Marker, InfoWindow } from '@vis.gl/react-google-maps';
+import { Siren, Map, ShieldAlert, Check, Radio, MapPin, Hospital, Building2 } from 'lucide-react';
 import { AMBULANCES_ENDPOINT, CASES_ENDPOINT } from '@/lib/api';
 
+const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
 const TRAFFIC_ROUTE_CLEARED_MARKER = '[TRAFFIC_ROUTE_CLEARED]';
+
+type Landmark = {
+  id: string;
+  name: string;
+  type: 'hospital' | 'police_station' | 'fire_station';
+  coordinates: { lat: number; lng: number };
+};
+
+const landmarks: Landmark[] = [
+  {
+    id: 'HOSP001',
+    name: 'City General Hospital',
+    type: 'hospital',
+    coordinates: { lat: 40.7200, lng: -74.0100 },
+  },
+  {
+    id: 'HOSP002',
+    name: 'Memorial Hospital',
+    type: 'hospital',
+    coordinates: { lat: 40.7600, lng: -73.9900 },
+  },
+  {
+    id: 'HOSP003',
+    name: 'St. Mary Medical Center',
+    type: 'hospital',
+    coordinates: { lat: 40.7450, lng: -73.9750 },
+  },
+  {
+    id: 'POL001',
+    name: 'Police Station 1',
+    type: 'police_station',
+    coordinates: { lat: 40.7150, lng: -74.0050 },
+  },
+  {
+    id: 'POL002',
+    name: 'Police Station 2',
+    type: 'police_station',
+    coordinates: { lat: 40.7550, lng: -73.9800 },
+  },
+  {
+    id: 'FIRE001',
+    name: 'Fire Station 1',
+    type: 'fire_station',
+    coordinates: { lat: 40.7250, lng: -74.0000 },
+  },
+];
 
 type EmergencyCase = {
   id: string;
@@ -256,36 +304,139 @@ export default function PolicePanel() {
             </div>
           </div>
           
-          <div className="flex flex-1 items-center justify-center bg-slate-100/40 p-6">
-            <div className="text-center">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-blue-600">
-                <Map size={32} />
-              </div>
-              <p className="mt-4 text-slate-500">
-                {loading
-                  ? 'Loading active emergency corridors...'
-                  : corridorItems.length > 0
-                    ? `Tracking ${corridorItems.length} dispatched unit corridor(s).`
-                    : 'No active dispatched units right now.'}
-              </p>
+          <div className="flex-1 bg-slate-100/40">
+            <APIProvider apiKey={GOOGLE_MAPS_API_KEY}>
+              <GoogleMap
+                defaultCenter={{ lat: 40.7128, lng: -74.006 }}
+                defaultZoom={12}
+                mapId="police-traffic-map"
+                gestureHandling="greedy"
+                disableDefaultUI={false}
+                style={{ width: '100%', height: '100%' }}
+              >
+                {/* Emergency Case Markers */}
+                {corridorItems.map(({ unit, currentCase }) =>
+                  currentCase ? (
+                    <Marker
+                      key={currentCase.id}
+                      position={{ lat: currentCase.locationLat, lng: currentCase.locationLng }}
+                      title={`Emergency: ${currentCase.aiSeverity}`}
+                      icon={{
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 14,
+                        fillColor: currentCase.aiSeverity === 'CRITICAL' ? '#dc2626' : '#f97316',
+                        fillOpacity: 1,
+                        strokeColor: '#ffffff',
+                        strokeWeight: 3,
+                      }}
+                    />
+                  ) : null
+                )}
 
-              {corridorItems.length > 0 ? (
-                <div className="mt-4 flex flex-wrap justify-center gap-2">
-                  {corridorItems.map(({ unit, currentCase }) =>
-                    currentCase ? (
-                      <a
-                        key={unit.id}
-                        href={`https://www.google.com/maps?q=${currentCase.locationLat},${currentCase.locationLng}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="rounded-full border border-blue-200 bg-white px-3 py-1 text-xs font-medium text-blue-700 hover:bg-blue-50"
-                      >
-                        Open {unit.driverName} route
-                      </a>
-                    ) : null
-                  )}
-                </div>
-              ) : null}
+                {/* Ambulance Unit Markers */}
+                {corridorItems.map(({ unit }) => (
+                  <Marker
+                    key={unit.id}
+                    position={{ lat: 40.7128 + Math.random() * 0.05, lng: -74.006 + Math.random() * 0.05 }}
+                    title={`Ambulance: ${unit.driverName}`}
+                    icon={{
+                      path: 'M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3z',
+                      scale: 1.5,
+                      fillColor: '#3b82f6',
+                      fillOpacity: 1,
+                      strokeColor: '#ffffff',
+                      strokeWeight: 2,
+                      anchor: new google.maps.Point(12, 12),
+                    }}
+                  />
+                ))}
+
+                {/* Hospital Landmarks */}
+                {landmarks
+                  .filter(l => l.type === 'hospital')
+                  .map(landmark => (
+                    <Marker
+                      key={landmark.id}
+                      position={landmark.coordinates}
+                      title={landmark.name}
+                      icon={{
+                        path: 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z',
+                        scale: 1.2,
+                        fillColor: '#10b981',
+                        fillOpacity: 0.9,
+                        strokeColor: '#ffffff',
+                        strokeWeight: 2,
+                        anchor: new google.maps.Point(12, 22),
+                      }}
+                    />
+                  ))}
+
+                {/* Police Station Landmarks */}
+                {landmarks
+                  .filter(l => l.type === 'police_station')
+                  .map(landmark => (
+                    <Marker
+                      key={landmark.id}
+                      position={landmark.coordinates}
+                      title={landmark.name}
+                      icon={{
+                        path: 'M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3z',
+                        scale: 1.3,
+                        fillColor: '#3b82f6',
+                        fillOpacity: 0.9,
+                        strokeColor: '#ffffff',
+                        strokeWeight: 2,
+                        anchor: new google.maps.Point(12, 12),
+                      }}
+                    />
+                  ))}
+
+                {/* Fire Station Landmarks */}
+                {landmarks
+                  .filter(l => l.type === 'fire_station')
+                  .map(landmark => (
+                    <Marker
+                      key={landmark.id}
+                      position={landmark.coordinates}
+                      title={landmark.name}
+                      icon={{
+                        path: 'M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3z',
+                        scale: 1.3,
+                        fillColor: '#ef4444',
+                        fillOpacity: 0.9,
+                        strokeColor: '#ffffff',
+                        strokeWeight: 2,
+                        anchor: new google.maps.Point(12, 12),
+                      }}
+                    />
+                  ))}
+              </GoogleMap>
+            </APIProvider>
+          </div>
+
+          {/* Map Legend */}
+          <div className="border-t border-slate-100 bg-white px-5 py-3">
+            <div className="flex flex-wrap gap-4 text-xs">
+              <div className="flex items-center gap-2">
+                <div className="h-3 w-3 rounded-full bg-red-600"></div>
+                <span className="text-slate-600">Critical Emergency</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="h-3 w-3 rounded-full bg-orange-500"></div>
+                <span className="text-slate-600">High Priority</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="h-3 w-3 rounded-full bg-blue-500"></div>
+                <span className="text-slate-600">Ambulance / Police</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="h-3 w-3 rounded-full bg-green-500"></div>
+                <span className="text-slate-600">Hospital</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="h-3 w-3 rounded-full bg-red-500"></div>
+                <span className="text-slate-600">Fire Station</span>
+              </div>
             </div>
           </div>
         </div>
