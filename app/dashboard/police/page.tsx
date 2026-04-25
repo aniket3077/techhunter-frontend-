@@ -18,39 +18,39 @@ type Landmark = {
 const landmarks: Landmark[] = [
   {
     id: 'HOSP001',
-    name: 'City General Hospital',
+    name: 'Government Medical College & Hospital',
     type: 'hospital',
-    coordinates: { lat: 40.7200, lng: -74.0100 },
+    coordinates: { lat: 19.8762, lng: 75.3433 },
   },
   {
     id: 'HOSP002',
-    name: 'Memorial Hospital',
+    name: 'Sahyadri Speciality Hospital',
     type: 'hospital',
-    coordinates: { lat: 40.7600, lng: -73.9900 },
+    coordinates: { lat: 19.8520, lng: 75.3250 },
   },
   {
     id: 'HOSP003',
-    name: 'St. Mary Medical Center',
+    name: 'Care Hospital',
     type: 'hospital',
-    coordinates: { lat: 40.7450, lng: -73.9750 },
+    coordinates: { lat: 19.8800, lng: 75.3600 },
   },
   {
     id: 'POL001',
-    name: 'Police Station 1',
+    name: 'City Chowk Police Station',
     type: 'police_station',
-    coordinates: { lat: 40.7150, lng: -74.0050 },
+    coordinates: { lat: 19.8762, lng: 75.3433 },
   },
   {
     id: 'POL002',
-    name: 'Police Station 2',
+    name: 'Kranti Chowk Police Station',
     type: 'police_station',
-    coordinates: { lat: 40.7550, lng: -73.9800 },
+    coordinates: { lat: 19.8700, lng: 75.3500 },
   },
   {
     id: 'FIRE001',
-    name: 'Fire Station 1',
+    name: 'Fire Station Chhatrapati Sambhajinagar',
     type: 'fire_station',
-    coordinates: { lat: 40.7250, lng: -74.0000 },
+    coordinates: { lat: 19.8750, lng: 75.3400 },
   },
 ];
 
@@ -307,7 +307,7 @@ export default function PolicePanel() {
           <div className="flex-1 bg-slate-100/40">
             <APIProvider apiKey={GOOGLE_MAPS_API_KEY}>
               <GoogleMap
-                defaultCenter={{ lat: 40.7128, lng: -74.006 }}
+                defaultCenter={{ lat: 19.8762, lng: 75.3433 }}
                 defaultZoom={12}
                 mapId="police-traffic-map"
                 gestureHandling="greedy"
