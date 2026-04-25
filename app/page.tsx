@@ -1,5 +1,22 @@
-import Image from "next/image";
-import { HEALTH_ENDPOINT } from "@/lib/api";
+import Link from 'next/link';
+import {
+  Ambulance,
+  ArrowRight,
+  BellRing,
+  BrainCircuit,
+  Building2,
+  Database,
+  HeartPulse,
+  MapPinned,
+  Mic,
+  Navigation,
+  PhoneCall,
+  Siren,
+  Sparkles,
+  Stethoscope,
+  TimerReset,
+} from 'lucide-react';
+import { DASHBOARD_SUMMARY_ENDPOINT, HEALTH_ENDPOINT } from '@/lib/api';
 
 type HealthData = {
   status: string;
@@ -9,94 +26,333 @@ type HealthData = {
   uptimeSeconds: number;
 };
 
-type HealthApiResponse = {
-  success: boolean;
-  data?: HealthData;
+type DashboardSummary = {
+  activeEmergencies: number;
+  pendingDispatch: number;
+  criticalAlerts: number;
+  resolvedToday: number;
+  availableAmbulances: number;
+  totalAmbulances: number;
+  connectedHospitals: number;
+  averageResolutionMinutes: number | null;
+  fleetReadiness: number | null;
 };
 
-async function loadHealth(): Promise<HealthApiResponse | null> {
+type ApiResponse<T> = {
+  success: boolean;
+  data?: T;
+};
+
+async function loadJson<T>(url: string) {
   try {
-    const response = await fetch(HEALTH_ENDPOINT, { cache: "no-store" });
+    const response = await fetch(url, {
+      next: { revalidate: 15 },
+    });
 
     if (!response.ok) {
       return null;
     }
 
-    return (await response.json()) as HealthApiResponse;
+    return (await response.json()) as ApiResponse<T>;
   } catch {
     return null;
   }
 }
 
+function formatMinutes(minutes: number | null | undefined) {
+  return typeof minutes === 'number' ? `${minutes} min` : 'Learning';
+}
+
+const productLanes = [
+  {
+    title: 'User App',
+    icon: PhoneCall,
+    accent: 'border-rose-400/25 bg-rose-400/10 text-rose-100',
+    items: ['SOS button', 'Voice command trigger', 'Live tracking', 'Emergency history'],
+  },
+  {
+    title: 'Web Dashboard',
+    icon: Building2,
+    accent: 'border-cyan-400/25 bg-cyan-400/10 text-cyan-100',
+    items: ['Hospital login', 'Case monitoring', 'AI severity display', 'Resource allocation'],
+  },
+  {
+    title: 'Ambulance Interface',
+    icon: Ambulance,
+    accent: 'border-emerald-400/25 bg-emerald-400/10 text-emerald-100',
+    items: ['Request notification', 'Accept or reject workflow', 'Navigation cues', 'Unit status updates'],
+  },
+] as const;
+
+const aiModules = [
+  {
+    title: 'Accident detection',
+    description: 'Use image input to flag crash scenes and feed triage signals into the dispatch loop.',
+    icon: Sparkles,
+  },
+  {
+    title: 'Severity classification',
+    description: 'Rank incidents by urgency so hospitals and ambulance crews see the riskiest cases first.',
+    icon: BrainCircuit,
+  },
+  {
+    title: 'Smart ambulance selection',
+    description: 'Recommend the best available unit using live status, assignment load, and hospital alignment.',
+    icon: Siren,
+  },
+  {
+    title: 'Route optimization',
+    description: 'Use live coordinates to keep responders moving on the fastest path to patient pickup.',
+    icon: Navigation,
+  },
+] as const;
+
+const stackItems = [
+  {
+    title: 'React-driven interfaces',
+    description: 'Citizen app, hospital dashboard, and fleet console built in a shared React-based frontend.',
+    icon: HeartPulse,
+  },
+  {
+    title: 'Next.js APIs',
+    description: 'Route handlers manage SOS intake, live case monitoring, ambulance status, and dashboard summaries.',
+    icon: BellRing,
+  },
+  {
+    title: 'AWS RDS-ready PostgreSQL layer',
+    description: 'Operational data is structured for PostgreSQL so the deployment path fits AWS RDS cleanly.',
+    icon: Database,
+  },
+] as const;
+
 export default async function Home() {
-  const health = await loadHealth();
+  const [health, summary] = await Promise.all([
+    loadJson<HealthData>(HEALTH_ENDPOINT),
+    loadJson<DashboardSummary>(DASHBOARD_SUMMARY_ENDPOINT),
+  ]);
+
+  const overview = summary?.data;
+  const apiHealthy = health?.data?.status === 'ok';
 
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-sm leading-6 text-zinc-700 dark:text-zinc-300">
-            Backend health: {health?.success ? "Connected" : "Not connected"}
-          </p>
-          {health?.success && health.data ? (
-            <p className="max-w-md text-sm leading-6 text-zinc-700 dark:text-zinc-300">
-              {health.data.service} ({health.data.environment}) | Uptime: {health.data.uptimeSeconds}s
+    <div className="px-4 py-4 sm:px-6 lg:px-8">
+      <main className="mx-auto flex max-w-7xl flex-col gap-6">
+        <section className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(248,113,113,0.28),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(34,211,238,0.2),_transparent_24%),linear-gradient(135deg,#08111f_0%,#121d34_45%,#15243b_100%)] px-6 py-10 shadow-2xl shadow-slate-950/30 sm:px-10 lg:px-12 lg:py-14">
+          <div className="absolute inset-y-0 right-0 hidden w-1/2 bg-[radial-gradient(circle,_rgba(34,211,238,0.12),_transparent_58%)] lg:block" />
+
+          <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1.3fr)_360px] lg:items-end">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/8 px-4 py-2 text-sm text-cyan-100">
+                <Stethoscope size={16} />
+                AI emergency response platform
+              </div>
+
+              <h1 className="mt-6 max-w-3xl text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+                Faster emergency decisions with real-time triage, dispatch, and cloud-backed coordination.
+              </h1>
+
+              <p className="mt-5 max-w-2xl text-base leading-8 text-slate-200 sm:text-lg">
+                PulseRescue AI brings together citizens, hospitals, and ambulance fleets so SOS intake,
+                severity classification, live tracking, and ambulance selection happen in one operating system.
+              </p>
+
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <Link
+                  href="/dashboard"
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-rose-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-rose-400"
+                >
+                  Open command center
+                  <ArrowRight size={16} />
+                </Link>
+                <Link
+                  href="/dashboard/units"
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/8 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/12"
+                >
+                  View ambulance fleet
+                  <Ambulance size={16} />
+                </Link>
+              </div>
+            </div>
+
+            <div className="relative rounded-[1.75rem] border border-white/10 bg-slate-950/50 p-6 backdrop-blur">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm uppercase tracking-[0.3em] text-cyan-200">System Pulse</p>
+                  <h2 className="mt-2 text-xl font-semibold text-white">Live platform state</h2>
+                </div>
+                <span className="rounded-full border border-white/10 bg-white/8 px-3 py-1 text-xs uppercase tracking-[0.2em] text-slate-300">
+                  {apiHealthy ? 'Connected' : 'Waiting'}
+                </span>
+              </div>
+
+              <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+                <div className="rounded-2xl border border-white/10 bg-white/6 p-4">
+                  <p className="text-sm text-slate-300">Active emergencies</p>
+                  <p className="mt-3 text-3xl font-semibold text-white">{overview?.activeEmergencies ?? 0}</p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-white/6 p-4">
+                  <p className="text-sm text-slate-300">Available ambulances</p>
+                  <p className="mt-3 text-3xl font-semibold text-white">{overview?.availableAmbulances ?? 0}</p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-white/6 p-4">
+                  <p className="text-sm text-slate-300">Average response loop</p>
+                  <p className="mt-3 text-3xl font-semibold text-white">
+                    {formatMinutes(overview?.averageResolutionMinutes)}
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-white/6 p-4">
+                  <p className="text-sm text-slate-300">Fleet readiness</p>
+                  <p className="mt-3 text-3xl font-semibold text-white">
+                    {overview?.fleetReadiness ?? 0}%
+                  </p>
+                </div>
+              </div>
+
+              <p className="mt-5 text-sm leading-6 text-slate-300">
+                Backend status: {apiHealthy ? 'healthy' : 'not reachable'}.
+                {' '}
+                {health?.data
+                  ? `${health.data.service} in ${health.data.environment}, uptime ${health.data.uptimeSeconds}s.`
+                  : 'Start the backend service to unlock live summaries and case feeds.'}
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="grid gap-4 md:grid-cols-3">
+          {productLanes.map((lane) => {
+            const Icon = lane.icon;
+
+            return (
+              <article
+                key={lane.title}
+                className="rounded-[1.75rem] border border-white/10 bg-white/6 p-6 backdrop-blur"
+              >
+                <div className={`inline-flex rounded-2xl border p-3 ${lane.accent}`}>
+                  <Icon size={20} />
+                </div>
+                <h3 className="mt-5 text-2xl font-semibold text-white">{lane.title}</h3>
+                <div className="mt-5 grid gap-2 text-sm text-slate-300">
+                  {lane.items.map((item) => (
+                    <p key={item} className="rounded-2xl border border-white/8 bg-slate-950/40 px-4 py-3">
+                      {item}
+                    </p>
+                  ))}
+                </div>
+              </article>
+            );
+          })}
+        </section>
+
+        <section className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,1fr)]">
+          <div className="rounded-[2rem] border border-white/10 bg-white/6 p-6 backdrop-blur sm:p-8">
+            <div className="flex items-center gap-3 text-cyan-200">
+              <BrainCircuit size={20} />
+              <p className="text-sm uppercase tracking-[0.3em]">AI Capabilities</p>
+            </div>
+
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {aiModules.map((module) => {
+                const Icon = module.icon;
+
+                return (
+                  <article
+                    key={module.title}
+                    className="rounded-3xl border border-white/10 bg-slate-950/45 p-5"
+                  >
+                    <div className="inline-flex rounded-2xl border border-cyan-400/20 bg-cyan-400/10 p-3 text-cyan-100">
+                      <Icon size={18} />
+                    </div>
+                    <h3 className="mt-4 text-lg font-semibold text-white">{module.title}</h3>
+                    <p className="mt-3 text-sm leading-6 text-slate-300">{module.description}</p>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="rounded-[2rem] border border-white/10 bg-white/6 p-6 backdrop-blur sm:p-8">
+            <div className="flex items-center gap-3 text-cyan-200">
+              <TimerReset size={20} />
+              <p className="text-sm uppercase tracking-[0.3em]">Success Metrics</p>
+            </div>
+
+            <div className="mt-6 space-y-4">
+              <div className="rounded-3xl border border-white/10 bg-slate-950/45 p-5">
+                <p className="text-sm text-slate-300">Response time reduction</p>
+                <p className="mt-3 text-2xl font-semibold text-white">
+                  {formatMinutes(overview?.averageResolutionMinutes)}
+                </p>
+              </div>
+              <div className="rounded-3xl border border-white/10 bg-slate-950/45 p-5">
+                <p className="text-sm text-slate-300">System reliability</p>
+                <p className="mt-3 text-2xl font-semibold text-white">
+                  {apiHealthy ? 'Operational' : 'Needs backend'}
+                </p>
+              </div>
+              <div className="rounded-3xl border border-white/10 bg-slate-950/45 p-5">
+                <p className="text-sm text-slate-300">AI accuracy focus</p>
+                <p className="mt-3 text-2xl font-semibold text-white">
+                  {overview?.criticalAlerts ?? 0} high-priority cases under watch
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="grid gap-4 md:grid-cols-3">
+          {stackItems.map((item) => {
+            const Icon = item.icon;
+
+            return (
+              <article
+                key={item.title}
+                className="rounded-[1.75rem] border border-white/10 bg-white/6 p-6 backdrop-blur"
+              >
+                <div className="inline-flex rounded-2xl border border-white/10 bg-slate-950/40 p-3 text-cyan-100">
+                  <Icon size={20} />
+                </div>
+                <h3 className="mt-5 text-xl font-semibold text-white">{item.title}</h3>
+                <p className="mt-3 text-sm leading-6 text-slate-300">{item.description}</p>
+              </article>
+            );
+          })}
+        </section>
+
+        <section className="grid gap-4 md:grid-cols-3">
+          <article className="rounded-[1.75rem] border border-white/10 bg-white/6 p-6 backdrop-blur">
+            <div className="flex items-center gap-3 text-cyan-200">
+              <Mic size={18} />
+              <p className="text-sm font-semibold">Voice-trigger ready</p>
+            </div>
+            <p className="mt-4 text-sm leading-6 text-slate-300">
+              The citizen workflow is structured for a voice activation layer, so hands-free SOS can feed
+              the same backend pipeline as a manual emergency alert.
             </p>
-          ) : null}
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+          </article>
+
+          <article className="rounded-[1.75rem] border border-white/10 bg-white/6 p-6 backdrop-blur">
+            <div className="flex items-center gap-3 text-cyan-200">
+              <MapPinned size={18} />
+              <p className="text-sm font-semibold">Real-time tracking</p>
+            </div>
+            <p className="mt-4 text-sm leading-6 text-slate-300">
+              Every emergency case stores live coordinates, making it easy to stream tracking updates and
+              route ambulance crews without redesigning the data model.
+            </p>
+          </article>
+
+          <article className="rounded-[1.75rem] border border-white/10 bg-white/6 p-6 backdrop-blur">
+            <div className="flex items-center gap-3 text-cyan-200">
+              <Database size={18} />
+              <p className="text-sm font-semibold">Centralized cloud data</p>
+            </div>
+            <p className="mt-4 text-sm leading-6 text-slate-300">
+              Emergency records, dispatch summaries, and fleet state live in one operational database so
+              hospital teams and ambulance crews stay aligned.
+            </p>
+          </article>
+        </section>
       </main>
     </div>
   );

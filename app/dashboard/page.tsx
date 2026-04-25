@@ -1,136 +1,456 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Clock, AlertCircle, CheckCircle2, ChevronRight, Activity } from 'lucide-react';
+import {
+  Activity,
+  Ambulance,
+  BrainCircuit,
+  CheckCircle2,
+  Clock3,
+  MapPinned,
+  Radio,
+  TimerReset,
+  TriangleAlert,
+} from 'lucide-react';
+import { AMBULANCES_ENDPOINT, CASES_ENDPOINT } from '@/lib/api';
+
+type EmergencyCase = {
+  id: string;
+  status: 'PENDING' | 'DISPATCHED' | 'RESOLVED';
+  locationLat: number;
+  locationLng: number;
+  aiSeverity: string | null;
+  aiDescription: string | null;
+  createdAt: string;
+  user: {
+    name: string;
+    phone: string;
+    bloodType: string | null;
+    medicalHistory: string | null;
+  } | null;
+  assignedDriver: {
+    driverName: string;
+    status: string;
+    hospital: {
+      name: string;
+    } | null;
+  } | null;
+};
+
+type AmbulanceUnit = {
+  id: string;
+  driverName: string;
+  status: 'AVAILABLE' | 'DISPATCHED' | 'OFF_DUTY';
+  currentLat: number | null;
+  currentLng: number | null;
+  hospital: {
+    name: string;
+  } | null;
+  activeAssignmentCount: number;
+  recommendedAction: string;
+  currentAssignment: {
+    id: string;
+    status: string;
+    aiSeverity: string | null;
+    locationLat: number;
+    locationLng: number;
+    createdAt: string;
+  } | null;
+};
+
+type DashboardSummary = {
+  activeEmergencies: number;
+  pendingDispatch: number;
+  criticalAlerts: number;
+  resolvedToday: number;
+  availableAmbulances: number;
+  totalAmbulances: number;
+  connectedHospitals: number;
+  averageResolutionMinutes: number | null;
+  fleetReadiness: number | null;
+};
+
+type ApiResponse<T> = {
+  success: boolean;
+  data: T;
+};
+
+function severityTone(severity: string | null) {
+  switch (severity?.toUpperCase()) {
+    case 'CRITICAL':
+      return 'border-rose-400/40 bg-rose-400/15 text-rose-100';
+    case 'HIGH':
+      return 'border-orange-400/40 bg-orange-400/15 text-orange-100';
+    case 'MEDIUM':
+      return 'border-amber-400/40 bg-amber-400/15 text-amber-100';
+    default:
+      return 'border-slate-300/20 bg-slate-300/10 text-slate-100';
+  }
+}
+
+function statusTone(status: EmergencyCase['status'] | AmbulanceUnit['status']) {
+  switch (status) {
+    case 'PENDING':
+      return 'border-rose-400/35 bg-rose-400/15 text-rose-100';
+    case 'DISPATCHED':
+      return 'border-sky-400/35 bg-sky-400/15 text-sky-100';
+    case 'RESOLVED':
+    case 'AVAILABLE':
+      return 'border-emerald-400/35 bg-emerald-400/15 text-emerald-100';
+    default:
+      return 'border-amber-400/35 bg-amber-400/15 text-amber-100';
+  }
+}
+
+function formatMinutes(minutes: number | null) {
+  return minutes === null ? 'Learning' : `${minutes} min`;
+}
 
 export default function DashboardPage() {
-  const [cases, setCases] = useState<any[]>([]);
+  const [cases, setCases] = useState<EmergencyCase[]>([]);
+  const [ambulances, setAmbulances] = useState<AmbulanceUnit[]>([]);
+  const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
 
   useEffect(() => {
-    // In a real app, this would use SWR or React Query, and handle auto-polling or websockets
-    const fetchCases = async () => {
+    let mounted = true;
+
+    const fetchDashboard = async () => {
       try {
-        const res = await fetch('/api/cases');
-        if (!res.ok) throw new Error('Failed to fetch cases');
-        const json = await res.json();
-        setCases(json.data);
-      } catch (err: any) {
-        setError(err.message);
+        const [casesResponse, summaryResponse, ambulanceResponse] = await Promise.all([
+          fetch(CASES_ENDPOINT, { cache: 'no-store' }),
+          fetch('/api/dashboard/summary', { cache: 'no-store' }),
+          fetch(AMBULANCES_ENDPOINT, { cache: 'no-store' }),
+        ]);
+
+        if (!casesResponse.ok || !summaryResponse.ok || !ambulanceResponse.ok) {
+          throw new Error('Unable to refresh command center data.');
+        }
+
+        const [casesJson, summaryJson, ambulancesJson] = (await Promise.all([
+          casesResponse.json(),
+          summaryResponse.json(),
+          ambulanceResponse.json(),
+        ])) as [
+          ApiResponse<EmergencyCase[]>,
+          ApiResponse<DashboardSummary>,
+          ApiResponse<AmbulanceUnit[]>,
+        ];
+
+        if (!mounted) {
+          return;
+        }
+
+        setCases(casesJson.data ?? []);
+        setSummary(summaryJson.data ?? null);
+        setAmbulances(ambulancesJson.data ?? []);
+        setLastUpdated(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+        setError(null);
+      } catch (fetchError) {
+        if (!mounted) {
+          return;
+        }
+
+        const message =
+          fetchError instanceof Error ? fetchError.message : 'Unable to refresh command center data.';
+        setError(message);
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
 
-    fetchCases();
-    const interval = setInterval(fetchCases, 5000); // Poll every 5s
-    return () => clearInterval(interval);
+    void fetchDashboard();
+    const interval = window.setInterval(() => {
+      void fetchDashboard();
+    }, 10000);
+
+    return () => {
+      mounted = false;
+      window.clearInterval(interval);
+    };
   }, []);
 
-  const getSeverityColor = (severity: string) => {
-    switch (severity?.toUpperCase()) {
-      case 'CRITICAL': return 'bg-red-100 text-red-800 border-red-200';
-      case 'HIGH': return 'bg-orange-100 text-orange-800 border-orange-200';
-      case 'MEDIUM': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'PENDING':
-        return <span className="flex items-center gap-1 text-red-600 bg-red-50 px-2 py-1 rounded-md text-xs font-medium"><AlertCircle size={14}/> Pending</span>;
-      case 'DISPATCHED':
-        return <span className="flex items-center gap-1 text-blue-600 bg-blue-50 px-2 py-1 rounded-md text-xs font-medium"><Activity size={14}/> Dispatched</span>;
-      case 'RESOLVED':
-        return <span className="flex items-center gap-1 text-green-600 bg-green-50 px-2 py-1 rounded-md text-xs font-medium"><CheckCircle2 size={14}/> Resolved</span>;
-      default:
-        return null;
-    }
-  };
+  const activeCases = cases.filter((emergencyCase) => emergencyCase.status !== 'RESOLVED');
+  const highlightedCase = activeCases[0] ?? null;
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-          <h3 className="text-gray-500 text-sm font-medium mb-2">Active Emergencies</h3>
-          <p className="text-3xl font-bold text-red-600">{cases.filter(c => c.status !== 'RESOLVED').length}</p>
-        </div>
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-          <h3 className="text-gray-500 text-sm font-medium mb-2">Pending Dispatch</h3>
-          <p className="text-3xl font-bold text-orange-600">{cases.filter(c => c.status === 'PENDING').length}</p>
-        </div>
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-          <h3 className="text-gray-500 text-sm font-medium mb-2">Available Ambulances</h3>
-          <p className="text-3xl font-bold text-green-600">8</p>
-        </div>
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-          <h3 className="text-gray-500 text-sm font-medium mb-2">Avg Response Time</h3>
-          <p className="text-3xl font-bold text-blue-600">4m 12s</p>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-          <h3 className="font-semibold text-gray-800">Live Incident Feed</h3>
-        </div>
-        
-        {loading ? (
-          <div className="p-8 text-center text-gray-500">Loading cases...</div>
-        ) : error ? (
-          <div className="p-8 text-center text-red-500">Error: {error}</div>
-        ) : cases.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">No emergency cases found.</div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-white border-b border-gray-200 text-sm text-gray-500">
-                  <th className="px-6 py-3 font-medium">Time</th>
-                  <th className="px-6 py-3 font-medium">Patient / Contact</th>
-                  <th className="px-6 py-3 font-medium">AI Severity</th>
-                  <th className="px-6 py-3 font-medium">Status</th>
-                  <th className="px-6 py-3 font-medium">Assigned Unit</th>
-                  <th className="px-6 py-3 font-medium"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {cases.map((c) => (
-                  <tr key={c.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      <div className="flex items-center gap-2">
-                        <Clock size={16} className="text-gray-400" />
-                        {new Date(c.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="text-sm font-medium text-gray-900">{c.user?.name || 'Unknown'}</p>
-                      <p className="text-xs text-gray-500">{c.user?.phone || 'No phone'}</p>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2 py-1 border rounded-md text-xs font-semibold ${getSeverityColor(c.aiSeverity)}`}>
-                        {c.aiSeverity || 'ANALYZING'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      {getStatusBadge(c.status)}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      {c.assignedDriver ? c.assignedDriver.driverName : 'Unassigned'}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <button className="text-blue-600 hover:text-blue-800 p-2 rounded-full hover:bg-blue-50 transition-colors">
-                        <ChevronRight size={20} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="rounded-3xl border border-white/10 bg-white/6 p-5">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-slate-300">Active emergencies</p>
+            <TriangleAlert className="text-rose-300" size={18} />
           </div>
-        )}
-      </div>
+          <p className="mt-4 text-3xl font-semibold text-white">
+            {summary?.activeEmergencies ?? activeCases.length}
+          </p>
+          <p className="mt-2 text-sm text-slate-400">
+            Critical alerts: {summary?.criticalAlerts ?? 0}
+          </p>
+        </div>
+
+        <div className="rounded-3xl border border-white/10 bg-white/6 p-5">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-slate-300">Pending dispatch</p>
+            <Radio className="text-amber-300" size={18} />
+          </div>
+          <p className="mt-4 text-3xl font-semibold text-white">
+            {summary?.pendingDispatch ?? 0}
+          </p>
+          <p className="mt-2 text-sm text-slate-400">
+            Last refresh: {lastUpdated ?? 'Starting stream'}
+          </p>
+        </div>
+
+        <div className="rounded-3xl border border-white/10 bg-white/6 p-5">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-slate-300">Available ambulances</p>
+            <Ambulance className="text-emerald-300" size={18} />
+          </div>
+          <p className="mt-4 text-3xl font-semibold text-white">
+            {summary?.availableAmbulances ?? 0}
+          </p>
+          <p className="mt-2 text-sm text-slate-400">
+            Fleet readiness: {summary?.fleetReadiness ?? 0}%
+          </p>
+        </div>
+
+        <div className="rounded-3xl border border-white/10 bg-white/6 p-5">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-slate-300">Average response loop</p>
+            <TimerReset className="text-sky-300" size={18} />
+          </div>
+          <p className="mt-4 text-3xl font-semibold text-white">
+            {formatMinutes(summary?.averageResolutionMinutes ?? null)}
+          </p>
+          <p className="mt-2 text-sm text-slate-400">
+            Resolved today: {summary?.resolvedToday ?? 0}
+          </p>
+        </div>
+      </section>
+
+      {error ? (
+        <div className="rounded-3xl border border-rose-400/30 bg-rose-400/10 px-5 py-4 text-sm text-rose-100">
+          {error}
+        </div>
+      ) : null}
+
+      <section className="grid gap-6 xl:grid-cols-[minmax(0,1.7fr)_minmax(340px,1fr)]">
+        <div className="rounded-3xl border border-white/10 bg-white/6 p-5">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-sm uppercase tracking-[0.25em] text-cyan-200">Case Monitoring</p>
+              <h3 className="mt-2 text-xl font-semibold text-white">Live incident feed</h3>
+            </div>
+            <span className="rounded-full border border-white/10 bg-white/8 px-3 py-1 text-xs uppercase tracking-[0.2em] text-slate-300">
+              {loading ? 'Syncing' : `${activeCases.length} live`}
+            </span>
+          </div>
+
+          <div className="mt-5 space-y-4">
+            {loading && cases.length === 0 ? (
+              <div className="rounded-3xl border border-dashed border-white/10 bg-slate-950/40 px-5 py-10 text-center text-slate-400">
+                Loading emergency cases...
+              </div>
+            ) : activeCases.length === 0 ? (
+              <div className="rounded-3xl border border-dashed border-white/10 bg-slate-950/40 px-5 py-10 text-center text-slate-400">
+                No active emergency cases yet. New SOS requests will appear here.
+              </div>
+            ) : (
+              activeCases.map((emergencyCase) => (
+                <article
+                  key={emergencyCase.id}
+                  className="rounded-3xl border border-white/10 bg-slate-950/45 p-5"
+                >
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="space-y-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span
+                          className={`rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] ${severityTone(
+                            emergencyCase.aiSeverity
+                          )}`}
+                        >
+                          {emergencyCase.aiSeverity ?? 'ANALYZING'}
+                        </span>
+                        <span
+                          className={`rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] ${statusTone(
+                            emergencyCase.status
+                          )}`}
+                        >
+                          {emergencyCase.status}
+                        </span>
+                      </div>
+
+                      <div>
+                        <h4 className="text-lg font-semibold text-white">
+                          {emergencyCase.user?.name ?? 'Unknown caller'}
+                        </h4>
+                        <p className="mt-1 text-sm text-slate-300">
+                          {emergencyCase.user?.phone ?? 'No contact number captured'}
+                        </p>
+                      </div>
+
+                      <div className="grid gap-3 text-sm text-slate-300 sm:grid-cols-2">
+                        <p className="flex items-center gap-2">
+                          <Clock3 size={16} className="text-cyan-300" />
+                          {new Date(emergencyCase.createdAt).toLocaleString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            month: 'short',
+                            day: 'numeric',
+                          })}
+                        </p>
+                        <p className="flex items-center gap-2">
+                          <MapPinned size={16} className="text-cyan-300" />
+                          {emergencyCase.locationLat.toFixed(4)}, {emergencyCase.locationLng.toFixed(4)}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="min-w-[220px] rounded-2xl border border-cyan-400/20 bg-cyan-400/10 p-4">
+                      <p className="text-xs uppercase tracking-[0.2em] text-cyan-100">
+                        Assigned response
+                      </p>
+                      <p className="mt-2 text-base font-semibold text-white">
+                        {emergencyCase.assignedDriver?.driverName ?? 'Awaiting dispatch'}
+                      </p>
+                      <p className="mt-1 text-sm text-slate-300">
+                        {emergencyCase.assignedDriver?.hospital?.name ?? 'Smart allocation queue'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <p className="mt-4 text-sm leading-6 text-slate-300">
+                    {emergencyCase.aiDescription?.trim() ||
+                      'AI summary pending. Voice, image, and live tracking signals can enrich this case.'}
+                  </p>
+                </article>
+              ))
+            )}
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <section className="rounded-3xl border border-white/10 bg-white/6 p-5">
+            <p className="text-sm uppercase tracking-[0.25em] text-cyan-200">AI Dispatch</p>
+            <h3 className="mt-2 text-xl font-semibold text-white">Severity and allocation view</h3>
+
+            <div className="mt-5 space-y-4">
+              <div className="rounded-2xl border border-white/10 bg-slate-950/45 p-4">
+                <div className="flex items-center gap-2 text-cyan-200">
+                  <BrainCircuit size={18} />
+                  <p className="text-sm font-semibold">Current AI recommendation</p>
+                </div>
+                <p className="mt-3 text-sm leading-6 text-slate-300">
+                  {highlightedCase
+                    ? `Prioritize ${highlightedCase.user?.name ?? 'the latest caller'} and route the nearest available ambulance before the next polling cycle.`
+                    : 'No active cases right now. AI dispatch recommendations will appear when new SOS events arrive.'}
+                </p>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="rounded-2xl border border-white/10 bg-slate-950/45 p-4">
+                  <p className="text-sm text-slate-300">Connected hospitals</p>
+                  <p className="mt-3 text-2xl font-semibold text-white">
+                    {summary?.connectedHospitals ?? 0}
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-slate-950/45 p-4">
+                  <p className="text-sm text-slate-300">Fleet size</p>
+                  <p className="mt-3 text-2xl font-semibold text-white">
+                    {summary?.totalAmbulances ?? ambulances.length}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="rounded-3xl border border-white/10 bg-white/6 p-5">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-sm uppercase tracking-[0.25em] text-cyan-200">Resource Allocation</p>
+                <h3 className="mt-2 text-xl font-semibold text-white">Ambulance readiness board</h3>
+              </div>
+              <Activity size={18} className="text-emerald-300" />
+            </div>
+
+            <div className="mt-5 space-y-3">
+              {ambulances.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-white/10 bg-slate-950/40 px-4 py-8 text-center text-sm text-slate-400">
+                  No ambulance units available yet. Add drivers in the backend database to populate this fleet board.
+                </div>
+              ) : (
+                ambulances.slice(0, 4).map((ambulance) => (
+                  <div
+                    key={ambulance.id}
+                    className="rounded-2xl border border-white/10 bg-slate-950/45 p-4"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-base font-semibold text-white">{ambulance.driverName}</p>
+                        <p className="mt-1 text-sm text-slate-300">
+                          {ambulance.hospital?.name ?? 'Unassigned hospital'}
+                        </p>
+                      </div>
+                      <span
+                        className={`rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] ${statusTone(
+                          ambulance.status
+                        )}`}
+                      >
+                        {ambulance.status}
+                      </span>
+                    </div>
+
+                    <p className="mt-3 text-sm text-slate-300">{ambulance.recommendedAction}</p>
+                    <p className="mt-2 text-xs uppercase tracking-[0.2em] text-slate-500">
+                      Active assignments: {ambulance.activeAssignmentCount}
+                    </p>
+                  </div>
+                ))
+              )}
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section className="grid gap-4 md:grid-cols-3">
+        <div className="rounded-3xl border border-white/10 bg-white/6 p-5">
+          <div className="flex items-center gap-2 text-cyan-200">
+            <CheckCircle2 size={18} />
+            <p className="text-sm font-semibold">Reliability goal</p>
+          </div>
+          <p className="mt-3 text-sm leading-6 text-slate-300">
+            Keep operators focused on a single live surface for alerts, ambulance readiness,
+            and hospital coordination.
+          </p>
+        </div>
+
+        <div className="rounded-3xl border border-white/10 bg-white/6 p-5">
+          <div className="flex items-center gap-2 text-cyan-200">
+            <Ambulance size={18} />
+            <p className="text-sm font-semibold">Fleet control</p>
+          </div>
+          <p className="mt-3 text-sm leading-6 text-slate-300">
+            Ambulance units are exposed through a dedicated endpoint so the fleet view can
+            power accept, reject, and availability workflows.
+          </p>
+        </div>
+
+        <div className="rounded-3xl border border-white/10 bg-white/6 p-5">
+          <div className="flex items-center gap-2 text-cyan-200">
+            <MapPinned size={18} />
+            <p className="text-sm font-semibold">Route-ready intake</p>
+          </div>
+          <p className="mt-3 text-sm leading-6 text-slate-300">
+            Location coordinates are stored with every SOS event so route optimization can be
+            layered in without changing the incident model.
+          </p>
+        </div>
+      </section>
     </div>
   );
 }

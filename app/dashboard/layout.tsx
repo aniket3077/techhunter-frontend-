@@ -1,63 +1,110 @@
+'use client';
+
 import Link from 'next/link';
-import { Activity, AlertTriangle, Users, Map as MapIcon, Settings } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import {
+  Activity,
+  Ambulance,
+  MapPinned,
+  Settings,
+  ShieldPlus,
+  Siren,
+} from 'lucide-react';
+
+const navigationItems = [
+  { href: '/dashboard', label: 'Emergencies', icon: Siren },
+  { href: '/dashboard/dispatch', label: 'Dispatch Flow', icon: MapPinned },
+  { href: '/dashboard/units', label: 'Ambulance Fleet', icon: Ambulance },
+  { href: '/dashboard/settings', label: 'Settings', icon: Settings },
+] as const;
+
+function isActive(pathname: string, href: string) {
+  if (href === '/dashboard') {
+    return pathname === href;
+  }
+
+  return pathname.startsWith(href);
+}
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+
   return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
-      <aside className="w-64 bg-slate-900 text-white flex flex-col">
-        <div className="p-6">
-          <h1 className="text-2xl font-bold flex items-center gap-2 text-red-500">
-            <Activity size={28} />
-            CareDispatch
-          </h1>
-          <p className="text-slate-400 text-sm mt-1">Hospital Dashboard</p>
-        </div>
-
-        <nav className="flex-1 px-4 space-y-2 mt-4">
-          <Link href="/dashboard" className="flex items-center gap-3 px-4 py-3 bg-red-600 text-white rounded-lg transition-colors">
-            <AlertTriangle size={20} />
-            <span>Emergencies</span>
-          </Link>
-          <Link href="/dashboard/dispatch" className="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-lg transition-colors">
-            <MapIcon size={20} />
-            <span>Live Map</span>
-          </Link>
-          <Link href="/dashboard/units" className="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-lg transition-colors">
-            <Users size={20} />
-            <span>Ambulances</span>
-          </Link>
-          <Link href="/dashboard/settings" className="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-lg transition-colors">
-            <Settings size={20} />
-            <span>Settings</span>
-          </Link>
-        </nav>
-
-        <div className="p-4 border-t border-slate-800">
+    <div className="min-h-screen lg:grid lg:grid-cols-[280px_minmax(0,1fr)]">
+      <aside className="border-b border-white/10 bg-slate-950/80 px-5 py-6 backdrop-blur lg:border-b-0 lg:border-r">
+        <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center font-bold">
-              CG
+            <div className="rounded-2xl bg-rose-500/20 p-3 text-rose-300">
+              <Activity size={26} />
             </div>
             <div>
-              <p className="font-medium text-sm">City General</p>
-              <p className="text-xs text-green-400">● Online</p>
+              <h1 className="text-xl font-semibold text-white">PulseRescue AI</h1>
+              <p className="text-sm text-slate-400">Hospital command center</p>
             </div>
           </div>
+
+          <div className="mt-5 flex items-center gap-2 text-sm text-emerald-300">
+            <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_18px_rgba(74,222,128,0.75)]" />
+            Operational
+          </div>
+        </div>
+
+        <nav className="mt-6 grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
+          {navigationItems.map((item) => {
+            const Icon = item.icon;
+            const active = isActive(pathname, item.href);
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-medium transition ${
+                  active
+                    ? 'border-rose-400/40 bg-rose-500/20 text-white shadow-lg shadow-rose-950/30'
+                    : 'border-white/8 bg-white/5 text-slate-300 hover:border-cyan-400/25 hover:bg-white/10 hover:text-white'
+                }`}
+              >
+                <Icon size={18} />
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="mt-6 rounded-3xl border border-cyan-400/20 bg-cyan-400/10 p-5">
+          <div className="flex items-center gap-2 text-cyan-200">
+            <ShieldPlus size={18} />
+            <p className="text-sm font-semibold">Prepared for surge mode</p>
+          </div>
+          <p className="mt-3 text-sm leading-6 text-slate-300">
+            AI triage, fleet status, and live dispatch tools stay grouped here so
+            operators can move from alert intake to assignment in one flow.
+          </p>
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 overflow-auto">
-        <header className="bg-white border-b border-gray-200 px-8 py-4 flex justify-between items-center">
-          <h2 className="text-xl font-semibold text-gray-800">Emergency Command Center</h2>
-          <div className="flex gap-4">
-            <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">System Status: Optimal</span>
-            <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">Beds Available: 42</span>
+      <main className="min-w-0 px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
+        <header className="mb-6 rounded-3xl border border-white/10 bg-white/6 px-5 py-5 backdrop-blur">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="text-sm uppercase tracking-[0.3em] text-cyan-200">Live Operations</p>
+              <h2 className="mt-2 text-2xl font-semibold text-white">
+                Emergency command center
+              </h2>
+            </div>
+
+            <div className="flex flex-wrap gap-3 text-sm">
+              <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-emerald-200">
+                AI severity monitoring
+              </span>
+              <span className="rounded-full border border-sky-400/20 bg-sky-400/10 px-4 py-2 text-sky-200">
+                Real-time fleet updates
+              </span>
+            </div>
           </div>
         </header>
-        <div className="p-8">
-          {children}
-        </div>
+
+        {children}
       </main>
     </div>
   );
