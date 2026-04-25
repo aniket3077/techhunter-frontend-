@@ -1,6 +1,45 @@
 import { BellRing, Database, ShieldPlus } from 'lucide-react';
+import { API_BASE_URL, API_PROXY_PREFIX, DASHBOARD_SUMMARY_ENDPOINT, HEALTH_ENDPOINT } from '@/lib/api';
 
-export default function SettingsPage() {
+type DashboardSummary = {
+  activeEmergencies: number;
+  availableAmbulances: number;
+};
+
+type HealthData = {
+  status: string;
+  environment?: string;
+};
+
+type ApiResponse<T> = {
+  success: boolean;
+  data?: T;
+};
+
+async function loadJson<T>(url: string) {
+  try {
+    const response = await fetch(url, {
+      next: { revalidate: 15 },
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    return (await response.json()) as ApiResponse<T>;
+  } catch {
+    return null;
+  }
+}
+
+export default async function SettingsPage() {
+  const [health, summary] = await Promise.all([
+    loadJson<HealthData>(HEALTH_ENDPOINT),
+    loadJson<DashboardSummary>(DASHBOARD_SUMMARY_ENDPOINT),
+  ]);
+
+  const apiHealthy = health?.data?.status === 'ok';
+
   return (
     <div className="space-y-6">
       <section className="rounded-3xl border border-slate-200/60 bg-white/60 p-6 shadow-sm">
@@ -10,6 +49,24 @@ export default function SettingsPage() {
           This surface keeps the technical pieces of the PRD visible: cloud database connectivity,
           API synchronization, and operational alerting.
         </p>
+
+        <div className="mt-5 flex flex-wrap gap-3 text-sm">
+          <span
+            className={`rounded-full border px-4 py-2 font-medium ${
+              apiHealthy
+                ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                : 'border-amber-200 bg-amber-50 text-amber-700'
+            }`}
+          >
+            Backend health: {apiHealthy ? 'Connected' : 'Unavailable'}
+          </span>
+          <span className="rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 font-medium text-cyan-700">
+            API base: {API_BASE_URL}
+          </span>
+          <span className="rounded-full border border-slate-200 bg-slate-100 px-4 py-2 font-medium text-slate-700">
+            Proxy prefix: {API_PROXY_PREFIX}
+          </span>
+        </div>
       </section>
 
       <section className="grid gap-4 md:grid-cols-3">
@@ -30,8 +87,9 @@ export default function SettingsPage() {
             <p className="text-sm font-semibold text-slate-900">API wiring</p>
           </div>
           <p className="mt-4 text-sm leading-6 text-slate-600">
-            The frontend now supports a configurable backend rewrite so local development and cloud deployment
-            can use the same request paths.
+            The frontend uses a configurable backend rewrite so local development and cloud deployment
+            can share request paths. Active emergencies: {summary?.data?.activeEmergencies ?? 0}, available
+            ambulances: {summary?.data?.availableAmbulances ?? 0}.
           </p>
         </article>
 
@@ -42,7 +100,7 @@ export default function SettingsPage() {
           </div>
           <p className="mt-4 text-sm leading-6 text-slate-600">
             Summary endpoints, case updates, and ambulance controls provide the core scaffolding needed
-            for later authentication, audit logging, and real-time event streaming.
+            for later authentication, audit logging, and real-time event streaming in {health?.data?.environment ?? 'unknown'} environment.
           </p>
         </article>
       </section>
