@@ -23,6 +23,78 @@ import {
 
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
 
+type NearbyLocation = {
+  id: string;
+  name: string;
+  type: 'hospital' | 'police_station' | 'fire_station' | 'pharmacy';
+  address: string;
+  distance: number;
+  eta: number;
+  coordinates: { lat: number; lng: number };
+  available?: boolean;
+};
+
+const nearbyLocations: NearbyLocation[] = [
+  {
+    id: 'HOSP001',
+    name: 'City General Hospital',
+    type: 'hospital',
+    address: '456 Medical Plaza, Downtown',
+    distance: 2.3,
+    eta: 6,
+    coordinates: { lat: 40.7200, lng: -74.0100 },
+    available: true,
+  },
+  {
+    id: 'HOSP002',
+    name: 'Memorial Hospital',
+    type: 'hospital',
+    address: '789 Health Ave, Midtown',
+    distance: 4.1,
+    eta: 10,
+    coordinates: { lat: 40.7600, lng: -73.9900 },
+    available: true,
+  },
+  {
+    id: 'HOSP003',
+    name: 'St. Mary Medical Center',
+    type: 'hospital',
+    address: '321 Care Blvd, Westside',
+    distance: 5.8,
+    eta: 14,
+    coordinates: { lat: 40.7450, lng: -73.9750 },
+    available: false,
+  },
+  {
+    id: 'POL001',
+    name: 'Police Station 1',
+    type: 'police_station',
+    address: '100 Safety St, Downtown',
+    distance: 1.5,
+    eta: 4,
+    coordinates: { lat: 40.7150, lng: -74.0050 },
+  },
+  {
+    id: 'FIRE001',
+    name: 'Fire Station 1',
+    type: 'fire_station',
+    address: '200 Rescue Rd, Downtown',
+    distance: 1.8,
+    eta: 5,
+    coordinates: { lat: 40.7250, lng: -74.0000 },
+  },
+  {
+    id: 'PHARM001',
+    name: '24/7 Emergency Pharmacy',
+    type: 'pharmacy',
+    address: '150 Health Plaza, Downtown',
+    distance: 1.2,
+    eta: 3,
+    coordinates: { lat: 40.7100, lng: -74.0080 },
+    available: true,
+  },
+];
+
 type Emergency = {
   id: string;
   patientName: string;
@@ -567,6 +639,75 @@ export default function DispatchClient() {
                       </span>
                     </button>
                   </div>
+                </div>
+              </div>
+
+              {/* Nearby Locations */}
+              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h2 className="flex items-center gap-2 text-xl font-semibold text-slate-900">
+                  <MapPin size={20} className="text-cyan-600" />
+                  Nearby Locations
+                </h2>
+                <p className="mt-2 text-sm text-slate-600">
+                  Critical facilities near the emergency location
+                </p>
+                <div className="mt-4 space-y-3 max-h-[400px] overflow-y-auto">
+                  {nearbyLocations.map(location => (
+                    <div
+                      key={location.id}
+                      className="rounded-xl border border-slate-200 bg-slate-50 p-4 hover:border-cyan-300 hover:bg-cyan-50 transition-all"
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            {location.type === 'hospital' && (
+                              <Hospital size={16} className="text-green-600" />
+                            )}
+                            {location.type === 'police_station' && (
+                              <Activity size={16} className="text-blue-600" />
+                            )}
+                            {location.type === 'fire_station' && (
+                              <AlertCircle size={16} className="text-red-600" />
+                            )}
+                            {location.type === 'pharmacy' && (
+                              <Activity size={16} className="text-purple-600" />
+                            )}
+                            <span className="font-semibold text-slate-900">{location.name}</span>
+                          </div>
+                          <p className="mt-1 text-xs text-slate-600">{location.address}</p>
+                          <div className="mt-2 flex items-center gap-3 text-xs">
+                            <span className="flex items-center gap-1 text-slate-600">
+                              <Navigation size={12} />
+                              {location.distance} km
+                            </span>
+                            <span className="flex items-center gap-1 text-slate-600">
+                              <Clock size={12} />
+                              {location.eta} min
+                            </span>
+                            {location.available !== undefined && (
+                              <span
+                                className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                                  location.available
+                                    ? 'bg-green-100 text-green-700'
+                                    : 'bg-red-100 text-red-700'
+                                }`}
+                              >
+                                {location.available ? 'Available' : 'Full'}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <a
+                          href={`https://www.google.com/maps/dir/?api=1&destination=${location.coordinates.lat},${location.coordinates.lng}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="ml-2 rounded-lg border border-cyan-200 bg-white px-3 py-2 text-xs font-medium text-cyan-700 hover:bg-cyan-50"
+                        >
+                          Navigate
+                        </a>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>

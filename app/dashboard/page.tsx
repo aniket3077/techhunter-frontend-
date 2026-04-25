@@ -11,8 +11,87 @@ import {
   Radio,
   TimerReset,
   TriangleAlert,
+  Hospital,
+  Navigation,
+  Shield,
 } from 'lucide-react';
 import { AMBULANCES_ENDPOINT, CASES_ENDPOINT } from '@/lib/api';
+
+type NearbyLocation = {
+  id: string;
+  name: string;
+  type: 'hospital' | 'police_station' | 'fire_station' | 'pharmacy';
+  address: string;
+  distance: number;
+  eta: number;
+  coordinates: { lat: number; lng: number };
+  available?: boolean;
+  capacity?: string;
+};
+
+const nearbyLocations: NearbyLocation[] = [
+  {
+    id: 'HOSP001',
+    name: 'City General Hospital',
+    type: 'hospital',
+    address: '456 Medical Plaza, Downtown',
+    distance: 2.3,
+    eta: 6,
+    coordinates: { lat: 40.7200, lng: -74.0100 },
+    available: true,
+    capacity: '15 beds available',
+  },
+  {
+    id: 'HOSP002',
+    name: 'Memorial Hospital',
+    type: 'hospital',
+    address: '789 Health Ave, Midtown',
+    distance: 4.1,
+    eta: 10,
+    coordinates: { lat: 40.7600, lng: -73.9900 },
+    available: true,
+    capacity: '8 beds available',
+  },
+  {
+    id: 'HOSP003',
+    name: 'St. Mary Medical Center',
+    type: 'hospital',
+    address: '321 Care Blvd, Westside',
+    distance: 5.8,
+    eta: 14,
+    coordinates: { lat: 40.7450, lng: -73.9750 },
+    available: false,
+    capacity: 'At capacity',
+  },
+  {
+    id: 'POL001',
+    name: 'Police Station 1',
+    type: 'police_station',
+    address: '100 Safety St, Downtown',
+    distance: 1.5,
+    eta: 4,
+    coordinates: { lat: 40.7150, lng: -74.0050 },
+  },
+  {
+    id: 'FIRE001',
+    name: 'Fire Station 1',
+    type: 'fire_station',
+    address: '200 Rescue Rd, Downtown',
+    distance: 1.8,
+    eta: 5,
+    coordinates: { lat: 40.7250, lng: -74.0000 },
+  },
+  {
+    id: 'PHARM001',
+    name: '24/7 Emergency Pharmacy',
+    type: 'pharmacy',
+    address: '150 Health Plaza, Downtown',
+    distance: 1.2,
+    eta: 3,
+    coordinates: { lat: 40.7100, lng: -74.0080 },
+    available: true,
+  },
+];
 
 type EmergencyCase = {
   id: string;
@@ -412,6 +491,81 @@ export default function DashboardPage() {
                   </div>
                 ))
               )}
+            </div>
+          </section>
+
+          {/* Nearby Locations */}
+          <section className="rounded-3xl border border-slate-200/60 bg-white/60 p-5 shadow-sm">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-sm font-medium uppercase tracking-[0.25em] text-cyan-600">Nearby Facilities</p>
+                <h3 className="mt-2 text-xl font-semibold text-slate-900">Critical locations</h3>
+              </div>
+              <MapPinned size={18} className="text-cyan-500" />
+            </div>
+
+            <div className="mt-5 space-y-3 max-h-[500px] overflow-y-auto">
+              {nearbyLocations.map(location => (
+                <div
+                  key={location.id}
+                  className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm hover:border-cyan-300 hover:shadow-md transition-all"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        {location.type === 'hospital' && (
+                          <Hospital size={16} className="text-green-600" />
+                        )}
+                        {location.type === 'police_station' && (
+                          <Shield size={16} className="text-blue-600" />
+                        )}
+                        {location.type === 'fire_station' && (
+                          <TriangleAlert size={16} className="text-red-600" />
+                        )}
+                        {location.type === 'pharmacy' && (
+                          <Activity size={16} className="text-purple-600" />
+                        )}
+                        <span className="font-semibold text-slate-900 text-sm">{location.name}</span>
+                      </div>
+                      <p className="mt-1 text-xs text-slate-600">{location.address}</p>
+                      <div className="mt-2 flex items-center gap-3 text-xs">
+                        <span className="flex items-center gap-1 text-slate-600">
+                          <Navigation size={12} />
+                          {location.distance} km
+                        </span>
+                        <span className="flex items-center gap-1 text-slate-600">
+                          <Clock3 size={12} />
+                          {location.eta} min
+                        </span>
+                        {location.capacity && (
+                          <span className="text-slate-500">{location.capacity}</span>
+                        )}
+                      </div>
+                      {location.available !== undefined && (
+                        <div className="mt-2">
+                          <span
+                            className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
+                              location.available
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-red-100 text-red-700'
+                            }`}
+                          >
+                            {location.available ? 'Available' : 'Full'}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <a
+                      href={`https://www.google.com/maps/dir/?api=1&destination=${location.coordinates.lat},${location.coordinates.lng}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="rounded-lg border border-cyan-200 bg-cyan-50 px-3 py-2 text-xs font-medium text-cyan-700 hover:bg-cyan-100 transition-colors"
+                    >
+                      Navigate
+                    </a>
+                  </div>
+                </div>
+              ))}
             </div>
           </section>
         </div>
