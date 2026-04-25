@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { APIProvider, Map, Marker, InfoWindow } from '@vis.gl/react-google-maps';
 import {
   AlertCircle,
   Ambulance,
@@ -19,6 +20,8 @@ import {
   Send,
   Bell,
 } from 'lucide-react';
+
+const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
 
 type Emergency = {
   id: string;
@@ -633,22 +636,123 @@ export default function DispatchClient() {
         </div>
       </section>
 
-      {/* Map View Placeholder */}
+      {/* Live Map View */}
       {activeTab === 'map' && (
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex h-96 items-center justify-center bg-slate-50 rounded-2xl">
-            <div className="text-center">
-              <MapPin size={48} className="mx-auto text-slate-300" />
-              <p className="mt-4 text-lg font-medium text-slate-500">Map View</p>
-              <p className="mt-2 text-sm text-slate-400">
-                Integrate with mapping service (Google Maps, Mapbox, etc.) to display:
-              </p>
-              <ul className="mt-3 space-y-1 text-sm text-slate-400">
-                <li>• Emergency locations with severity markers</li>
-                <li>• Ambulance positions in real-time</li>
-                <li>• Hospital locations</li>
-                <li>• Optimized routes</li>
-              </ul>
+          <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-slate-900">
+            <MapPin size={20} className="text-cyan-600" />
+            Live Emergency Map
+          </h2>
+          <div className="h-[600px] rounded-2xl overflow-hidden">
+            <APIProvider apiKey={GOOGLE_MAPS_API_KEY}>
+              <Map
+                defaultCenter={{ lat: 40.7128, lng: -74.006 }}
+                defaultZoom={12}
+                mapId="emergency-dispatch-map"
+                gestureHandling="greedy"
+                disableDefaultUI={false}
+              >
+                {/* Emergency Markers */}
+                {emergencies.map(emergency => (
+                  <Marker
+                    key={emergency.id}
+                    position={emergency.coordinates}
+                    title={`${emergency.patientName} - ${emergency.severity.toUpperCase()}`}
+                    icon={{
+                      path: google.maps.SymbolPath.CIRCLE,
+                      scale: 12,
+                      fillColor:
+                        emergency.severity === 'critical'
+                          ? '#ef4444'
+                          : emergency.severity === 'high'
+                          ? '#f97316'
+                          : emergency.severity === 'medium'
+                          ? '#eab308'
+                          : '#22c55e',
+                      fillOpacity: 0.9,
+                      strokeColor: '#ffffff',
+                      strokeWeight: 2,
+                    }}
+                    onClick={() => setSelectedEmergency(emergency)}
+                  />
+                ))}
+
+                {/* Ambulance Markers */}
+                {ambulances.map(ambulance => (
+                  <Marker
+                    key={ambulance.id}
+                    position={ambulance.coordinates}
+                    title={`${ambulance.vehicleNumber} - ${ambulance.status.toUpperCase()}`}
+                    icon={{
+                      path: 'M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3z',
+                      scale: 1.5,
+                      fillColor: ambulance.status === 'available' ? '#3b82f6' : '#94a3b8',
+                      fillOpacity: 1,
+                      strokeColor: '#ffffff',
+                      strokeWeight: 2,
+                      anchor: new google.maps.Point(12, 12),
+                    }}
+                  />
+                ))}
+
+                {/* Info Window for Selected Emergency */}
+                {selectedEmergency && (
+                  <InfoWindow
+                    position={selectedEmergency.coordinates}
+                    onCloseClick={() => setSelectedEmergency(null)}
+                  >
+                    <div className="p-2 max-w-xs">
+                      <h3 className="font-semibold text-slate-900">{selectedEmergency.patientName}</h3>
+                      <p className="text-xs text-slate-600 mt-1">{selectedEmergency.id}</p>
+                      <p className="text-sm text-slate-700 mt-2">{selectedEmergency.description}</p>
+                      <div className="mt-2 flex items-center gap-2">
+                        <span
+                          className={`text-xs font-medium px-2 py-1 rounded ${
+                            selectedEmergency.severity === 'critical'
+                              ? 'bg-red-100 text-red-700'
+                              : selectedEmergency.severity === 'high'
+                              ? 'bg-orange-100 text-orange-700'
+                              : selectedEmergency.severity === 'medium'
+                              ? 'bg-yellow-100 text-yellow-700'
+                              : 'bg-green-100 text-green-700'
+                          }`}
+                        >
+                          {selectedEmergency.severity.toUpperCase()}
+                        </span>
+                        <span className="text-xs text-slate-600">AI: {selectedEmergency.aiScore}</span>
+                      </div>
+                    </div>
+                  </InfoWindow>
+                )}
+              </Map>
+            </APIProvider>
+          </div>
+          
+          {/* Map Legend */}
+          <div className="mt-4 flex flex-wrap gap-4 text-sm">
+            <div className="flex items-center gap-2">
+              <div className="h-3 w-3 rounded-full bg-red-500"></div>
+              <span className="text-slate-600">Critical Emergency</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="h-3 w-3 rounded-full bg-orange-500"></div>
+              <span className="text-slate-600">High Priority</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="h-3 w-3 rounded-full bg-yellow-500"></div>
+              <span className="text-slate-600">Medium Priority</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="h-3 w-3 rounded-full bg-green-500"></div>
+              <span className="text-slate-600">Low Priority</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="h-3 w-3 rounded-full bg-blue-500"></div>
+              <span className="text-slate-600">Available Ambulance</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="h-3 w-3 rounded-full bg-slate-400"></div>
+              <span className="text-slate-600">Busy Ambulance</span>
             </div>
           </div>
         </section>
