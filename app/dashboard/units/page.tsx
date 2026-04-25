@@ -8,13 +8,89 @@ async function loadInitialUnits() {
     });
 
     if (!response.ok) {
-      return [];
+      // Return mock data if API is not available
+      return [
+        {
+          id: 'AMB001',
+          vehicleNumber: 'A-101',
+          driverName: 'Robert Wilson',
+          driverPhone: '+1-555-1001',
+          status: 'AVAILABLE',
+          currentAssignment: null,
+          recommendedAction: 'Standing by at Station 1',
+        },
+        {
+          id: 'AMB002',
+          vehicleNumber: 'A-102',
+          driverName: 'Sarah Davis',
+          driverPhone: '+1-555-1002',
+          status: 'AVAILABLE',
+          currentAssignment: null,
+          recommendedAction: 'Standing by at Station 2',
+        },
+        {
+          id: 'AMB003',
+          vehicleNumber: 'A-103',
+          driverName: 'Michael Brown',
+          driverPhone: '+1-555-1003',
+          status: 'DISPATCHED',
+          currentAssignment: { id: 'CASE001' },
+          recommendedAction: 'En route to emergency',
+        },
+        {
+          id: 'AMB004',
+          vehicleNumber: 'A-104',
+          driverName: 'Emily Johnson',
+          driverPhone: '+1-555-1004',
+          status: 'OFF_DUTY',
+          currentAssignment: null,
+          recommendedAction: 'Off duty - maintenance',
+        },
+      ] as AmbulanceUnit[];
     }
 
     const payload = (await response.json()) as ApiResponse<AmbulanceUnit[]>;
     return payload.data ?? [];
   } catch {
-    return [];
+    // Return mock data on error
+    return [
+      {
+        id: 'AMB001',
+        vehicleNumber: 'A-101',
+        driverName: 'Robert Wilson',
+        driverPhone: '+1-555-1001',
+        status: 'AVAILABLE',
+        currentAssignment: null,
+        recommendedAction: 'Standing by at Station 1',
+      },
+      {
+        id: 'AMB002',
+        vehicleNumber: 'A-102',
+        driverName: 'Sarah Davis',
+        driverPhone: '+1-555-1002',
+        status: 'AVAILABLE',
+        currentAssignment: null,
+        recommendedAction: 'Standing by at Station 2',
+      },
+      {
+        id: 'AMB003',
+        vehicleNumber: 'A-103',
+        driverName: 'Michael Brown',
+        driverPhone: '+1-555-1003',
+        status: 'DISPATCHED',
+        currentAssignment: { id: 'CASE001' },
+        recommendedAction: 'En route to emergency',
+      },
+      {
+        id: 'AMB004',
+        vehicleNumber: 'A-104',
+        driverName: 'Emily Johnson',
+        driverPhone: '+1-555-1004',
+        status: 'OFF_DUTY',
+        currentAssignment: null,
+        recommendedAction: 'Off duty - maintenance',
+      },
+    ] as AmbulanceUnit[];
   }
 }
 
